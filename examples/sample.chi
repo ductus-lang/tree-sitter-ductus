@@ -1,0 +1,13 @@
+# This is a comment
+# import ra_arch.rp
+z0 = (700,500);
+z1 = (500,300);
+z2 = (300,500);
+z3 = (500,700);
+p0 =  z0 [dir:90]
+  .. [dir:180] z1 [dir: 180]
+  .. [dir:270] z2 [dir: 270]
+  .. [dir:0] z3 [dir:0]
+  .. [dir:90] z0;
+draw(p0);
+stroke(p0);

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/config.schema.json",
+  "grammars": [
+    {
+      "name": "chi",
+      "camelcase": "Chi",
+      "title": "Chi",
+      "scope": "source.chi",
+      "file-types": [
+        "chi"
+      ],
+      "injection-regex": "^chi$",
+      "class-name": "TreeSitterChi"
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": "Chi graphical programming language",
+    "authors": [
+      {
+        "name": "Santhosh Thotingal",
+        "email": "santhosh.thottingal@gmail.com",
+        "url": "https://thottingal.in/"
+      }
+    ],
+    "links": {
+      "repository": "https://gitlab.com/chil-lang/tree-sitter-chi"
+    }
+  },
+  "bindings": {
+    "c": true,
+    "go": true,
+    "node": true,
+    "python": true,
+    "rust": true,
+    "swift": true,
+    "zig": false
+  }
+}
