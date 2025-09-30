@@ -1,0 +1,321 @@
+================================================================================
+Simple line comment
+================================================================================
+
+# This is a comment
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (comment))
+
+================================================================================
+Comment with assignment
+================================================================================
+
+# Set the value
+x = 5;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (comment)
+  (assignment_statement
+    (identifier)
+    (expression
+      (number))))
+
+================================================================================
+Comment after statement
+================================================================================
+
+x = 5; # This assigns 5 to x
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (number)))
+  (comment))
+
+================================================================================
+Multiple line comments
+================================================================================
+
+# First comment
+# Second comment
+# Third comment
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (comment)
+  (comment)
+  (comment))
+
+================================================================================
+Comments in different contexts
+================================================================================
+
+# Initialize variables
+x = 10;
+y = 20;
+
+# Calculate sum
+sum = x + y;
+
+# Draw the result
+draw(sum);
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (comment)
+  (assignment_statement
+    (identifier)
+    (expression
+      (number)))
+  (assignment_statement
+    (identifier)
+    (expression
+      (number)))
+  (comment)
+  (assignment_statement
+    (identifier)
+    (expression
+      (binary_expression
+        (expression
+          (identifier))
+        (operator)
+        (expression
+          (identifier)))))
+  (comment)
+  (function_call
+    (function_name)
+    (function_args
+      (identifier))))
+
+================================================================================
+Comments with special characters
+================================================================================
+
+# Comment with symbols: @#$%^&*()
+# Comment with numbers: 123456789
+# Comment with punctuation: .,;:'"!?
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (comment)
+  (comment)
+  (comment))
+
+================================================================================
+Comments within control structures
+================================================================================
+
+# Check condition
+if x {
+  # Inside if block
+  y = x + 1;
+} else {
+  # Inside else block
+  y = x - 1;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (comment)
+  (if_statement
+    condition: (expression
+      (identifier))
+    consequence: (block
+      (comment)
+      (assignment_statement
+        (identifier)
+        (expression
+          (binary_expression
+            (expression
+              (identifier))
+            (operator)
+            (expression
+              (number))))
+        (token)))
+    alternative: (else_clause
+      body: (block
+        (comment)
+        (assignment_statement
+          (identifier)
+          (expression
+            (binary_expression
+              (expression
+                (identifier))
+              (expression
+                (unary_expression
+                  (operator)
+                  (expression
+                    (number))))))
+          (token))))))
+
+================================================================================
+Comments within loops
+================================================================================
+
+# Process each item
+for item in items {
+  # Transform the item
+  transformed = item * 2;
+  # Draw the result
+  draw(transformed);
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (comment)
+  (for_statement
+    left: (expression
+      (identifier))
+    right: (expression
+      (identifier))
+    body: (block
+      (comment)
+      (assignment_statement
+        (identifier)
+        (expression
+          (binary_expression
+            (expression
+              (identifier))
+            (operator)
+            (expression
+              (number))))
+        (token))
+      (comment)
+      (function_call
+        (function_name)
+        (function_args
+          (identifier))
+        (token)))))
+
+================================================================================
+Empty comment
+================================================================================
+
+#
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (comment))
+
+================================================================================
+Comment with just spaces
+================================================================================
+
+#     
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (comment))
+
+================================================================================
+Comments with path expressions
+================================================================================
+
+# Define a simple path
+path1 = a -- b;
+
+# Define a curved path  
+path2 = c .. d .. e;
+
+# Mixed connectors
+path3 = start -- middle .. end;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (comment)
+  (assignment_statement
+    (identifier)
+    (expression
+      (path
+        (identifier)
+        (connector
+          (line_connector))
+        (identifier))))
+  (comment)
+  (assignment_statement
+    (identifier)
+    (expression
+      (path
+        (identifier)
+        (connector
+          (curve_connector))
+        (identifier)
+        (connector
+          (curve_connector))
+        (identifier))))
+  (comment)
+  (assignment_statement
+    (identifier)
+    (expression
+      (path
+        (identifier)
+        (connector
+          (line_connector))
+        (identifier)
+        (connector
+          (curve_connector))
+        (identifier)))))
+
+================================================================================
+Comments with point expressions
+================================================================================
+
+# Create a point at origin
+origin = (0, 0);
+
+# Create a point with expressions
+corner = (width - 1, height + 2);
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (comment)
+  (assignment_statement
+    (identifier)
+    (expression
+      (point
+        (x
+          (expression
+            (number)))
+        (y
+          (expression
+            (number))))))
+  (comment)
+  (assignment_statement
+    (identifier)
+    (expression
+      (point
+        (x
+          (expression
+            (binary_expression
+              (expression
+                (identifier))
+              (expression
+                (unary_expression
+                  (operator)
+                  (expression
+                    (number)))))))
+        (y
+          (expression
+            (binary_expression
+              (expression
+                (identifier))
+              (operator)
+              (expression
+                (number)))))))))

@@ -1,12 +1,714 @@
-==================
+================================================================================
 Simple assignment
-==================
-u = 100;
+================================================================================
 
----
+x = 5;
+
+--------------------------------------------------------------------------------
 
 (source_file
   (assignment_statement
     (identifier)
     (expression
       (number))))
+
+================================================================================
+Binary addition
+================================================================================
+
+x = a + b;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (binary_expression
+        (expression
+          (identifier))
+        (operator)
+        (expression
+          (identifier))))))
+
+================================================================================
+Binary subtraction
+================================================================================
+
+x = a - b;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (binary_expression
+        (expression
+          (identifier))
+        (expression
+          (unary_expression
+            (operator)
+            (expression
+              (identifier))))))))
+
+================================================================================
+Binary multiplication explicit
+================================================================================
+
+x = a * b;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (binary_expression
+        (expression
+          (identifier))
+        (operator)
+        (expression
+          (identifier))))))
+
+================================================================================
+Binary multiplication implicit
+================================================================================
+
+x = 5u;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (binary_expression
+        (expression
+          (number))
+        (expression
+          (identifier))))))
+
+================================================================================
+Binary division
+================================================================================
+
+x = a / b;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (binary_expression
+        (expression
+          (identifier))
+        (operator)
+        (expression
+          (identifier))))))
+
+================================================================================
+Binary exponentiation
+================================================================================
+
+x = a ^ b;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (binary_expression
+        (expression
+          (identifier))
+        (operator)
+        (expression
+          (identifier))))))
+
+================================================================================
+Unary minus
+================================================================================
+
+x = -a;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (unary_expression
+        (operator)
+        (expression
+          (identifier))))))
+
+================================================================================
+Simple parenthesized expression
+================================================================================
+
+x = (a);
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (parenthesized_expression
+        (expression
+          (identifier))))))
+
+================================================================================
+Parenthesized addition
+================================================================================
+
+x = (a + b);
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (parenthesized_expression
+        (expression
+          (binary_expression
+            (expression
+              (identifier))
+            (operator)
+            (expression
+              (identifier))))))))
+
+================================================================================
+Parenthesized multiplication with precedence
+================================================================================
+
+x = (a + b) * c;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (binary_expression
+        (expression
+          (parenthesized_expression
+            (expression
+              (binary_expression
+                (expression
+                  (identifier))
+                (operator)
+                (expression
+                  (identifier))))))
+        (operator)
+        (expression
+          (identifier))))))
+
+================================================================================
+Multiple levels of parentheses
+================================================================================
+
+x = ((a + b) * c);
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (parenthesized_expression
+        (expression
+          (binary_expression
+            (expression
+              (parenthesized_expression
+                (expression
+                  (binary_expression
+                    (expression
+                      (identifier))
+                    (operator)
+                    (expression
+                      (identifier))))))
+            (operator)
+            (expression
+              (identifier))))))))
+
+================================================================================
+Complex nested parentheses
+================================================================================
+
+x = ((a + b) * (c - d));
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (parenthesized_expression
+        (expression
+          (binary_expression
+            (expression
+              (parenthesized_expression
+                (expression
+                  (binary_expression
+                    (expression
+                      (identifier))
+                    (operator)
+                    (expression
+                      (identifier))))))
+            (operator)
+            (expression
+              (parenthesized_expression
+                (expression
+                  (binary_expression
+                    (expression
+                      (identifier))
+                    (expression
+                      (unary_expression
+                        (operator)
+                        (expression
+                          (identifier))))))))))))))
+
+================================================================================
+Parentheses with unary minus
+================================================================================
+
+x = -(a + b);
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (unary_expression
+        (operator)
+        (expression
+          (parenthesized_expression
+            (expression
+              (binary_expression
+                (expression
+                  (identifier))
+                (operator)
+                (expression
+                  (identifier))))))))))
+
+================================================================================
+Parentheses with exponentiation
+================================================================================
+
+x = (a + b) ^ 2;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (binary_expression
+        (expression
+          (parenthesized_expression
+            (expression
+              (binary_expression
+                (expression
+                  (identifier))
+                (operator)
+                (expression
+                  (identifier))))))
+        (operator)
+        (expression
+          (number))))))
+
+================================================================================
+Mixed precedence without parentheses
+================================================================================
+
+x = a + b * c;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (binary_expression
+        (expression
+          (identifier))
+        (operator)
+        (expression
+          (binary_expression
+            (expression
+              (identifier))
+            (operator)
+            (expression
+              (identifier))))))))
+
+================================================================================
+Mixed precedence with parentheses changing order
+================================================================================
+
+x = (a + b) * c;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (binary_expression
+        (expression
+          (parenthesized_expression
+            (expression
+              (binary_expression
+                (expression
+                  (identifier))
+                (operator)
+                (expression
+                  (identifier))))))
+        (operator)
+        (expression
+          (identifier))))))
+
+================================================================================
+Point expression (should not conflict with parentheses)
+================================================================================
+
+x = (1, 2);
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (point
+        (x
+          (expression
+            (number)))
+        (y
+          (expression
+            (number)))))))
+
+================================================================================
+Point with expressions
+================================================================================
+
+x = (a + 1, b * 2);
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (point
+        (x
+          (expression
+            (binary_expression
+              (expression
+                (identifier))
+              (operator)
+              (expression
+                (number)))))
+        (y
+          (expression
+            (binary_expression
+              (expression
+                (identifier))
+              (operator)
+              (expression
+                (number)))))))))
+
+================================================================================
+Point with parenthesized expressions
+================================================================================
+
+x = ((a + 1), (b * 2));
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (point
+        (x
+          (expression
+            (parenthesized_expression
+              (expression
+                (binary_expression
+                  (expression
+                    (identifier))
+                  (operator)
+                  (expression
+                    (number)))))))
+        (y
+          (expression
+            (parenthesized_expression
+              (expression
+                (binary_expression
+                  (expression
+                    (identifier))
+                  (operator)
+                  (expression
+                    (number)))))))))))
+
+================================================================================
+Floating point numbers
+================================================================================
+
+x = 3.14;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (number))))
+
+================================================================================
+Negative floating point numbers
+================================================================================
+
+x = -3.14;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (number))))
+
+================================================================================
+Parenthesized negative number
+================================================================================
+
+x = (-3.14);
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (parenthesized_expression
+        (expression
+          (number))))))
+
+================================================================================
+Complex expression with all operators
+================================================================================
+
+x = (a + b) * c / d - e ^ f;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (binary_expression
+        (expression
+          (binary_expression
+            (expression
+              (binary_expression
+                (expression
+                  (parenthesized_expression
+                    (expression
+                      (binary_expression
+                        (expression
+                          (identifier))
+                        (operator)
+                        (expression
+                          (identifier))))))
+                (operator)
+                (expression
+                  (identifier))))
+            (operator)
+            (expression
+              (identifier))))
+        (expression
+          (unary_expression
+            (operator)
+            (expression
+              (binary_expression
+                (expression
+                  (identifier))
+                (operator)
+                (expression
+                  (identifier))))))))))
+
+================================================================================
+Path expression with identifiers
+================================================================================
+
+x = a -- b -- c;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (path
+        (identifier)
+        (connector
+          (line_connector))
+        (identifier)
+        (connector
+          (line_connector))
+        (identifier)))))
+
+================================================================================
+Path with points
+================================================================================
+
+x = (0,0) -- (1,1);
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (path
+        (point
+          (x
+            (expression
+              (number)))
+          (y
+            (expression
+              (number))))
+        (connector
+          (line_connector))
+        (point
+          (x
+            (expression
+              (number)))
+          (y
+            (expression
+              (number))))))))
+
+================================================================================
+Path with curve connector
+================================================================================
+
+x = a .. b .. c;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (path
+        (identifier)
+        (connector
+          (curve_connector))
+        (identifier)
+        (connector
+          (curve_connector))
+        (identifier)))))
+
+================================================================================
+Mixed path connectors
+================================================================================
+
+x = a -- b .. c;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (path
+        (identifier)
+        (connector
+          (line_connector))
+        (identifier)
+        (connector
+          (curve_connector))
+        (identifier)))))
+
+================================================================================
+Implicit multiplication with parentheses
+================================================================================
+
+x = 2(a + b);
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (binary_expression
+        (expression
+          (number))
+        (expression
+          (parenthesized_expression
+            (expression
+              (binary_expression
+                (expression
+                  (identifier))
+                (operator)
+                (expression
+                  (identifier))))))))))
+
+================================================================================
+Chained implicit multiplication
+================================================================================
+
+x = 2a3b;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (binary_expression
+        (expression
+          (number))
+        (expression
+          (identifier))))))
+
+================================================================================
+Parentheses in point coordinates
+================================================================================
+
+x = ((a + b), (c * d));
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (point
+        (x
+          (expression
+            (parenthesized_expression
+              (expression
+                (binary_expression
+                  (expression
+                    (identifier))
+                  (operator)
+                  (expression
+                    (identifier)))))))
+        (y
+          (expression
+            (parenthesized_expression
+              (expression
+                (binary_expression
+                  (expression
+                    (identifier))
+                  (operator)
+                  (expression
+                    (identifier)))))))))))

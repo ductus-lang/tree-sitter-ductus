@@ -1,0 +1,303 @@
+================================================================================
+Simple if statement
+================================================================================
+
+if x {
+  y = 5;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (if_statement
+    condition: (expression
+      (identifier))
+    consequence: (block
+      (assignment_statement
+        (identifier)
+        (expression
+          (number))
+        (token)))))
+
+================================================================================
+If statement with else clause
+================================================================================
+
+if condition {
+  x = 1;
+} else {
+  x = 2;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (if_statement
+    condition: (expression
+      (identifier))
+    consequence: (block
+      (assignment_statement
+        (identifier)
+        (expression
+          (number))
+        (token)))
+    alternative: (else_clause
+      body: (block
+        (assignment_statement
+          (identifier)
+          (expression
+            (number))
+          (token))))))
+
+================================================================================
+If with binary expression condition
+================================================================================
+
+if a + b {
+  result = true;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (if_statement
+    condition: (expression
+      (binary_expression
+        (expression
+          (identifier))
+        (operator)
+        (expression
+          (identifier))))
+    consequence: (block
+      (assignment_statement
+        (identifier)
+        (expression
+          (identifier))
+        (token)))))
+
+================================================================================
+If with parenthesized condition
+================================================================================
+
+if (x > 0) {
+  positive = x;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (if_statement
+    condition: (expression
+      (parenthesized_expression
+        (expression
+          (binary_expression
+            (expression
+              (identifier))
+            (operator)
+            (expression
+              (number))))))
+    consequence: (block
+      (assignment_statement
+        (identifier)
+        (expression
+          (identifier))
+        (token)))))
+
+================================================================================
+Nested if statements
+================================================================================
+
+if outer {
+  if inner {
+    value = nested;
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (if_statement
+    condition: (expression
+      (identifier))
+    consequence: (block
+      (if_statement
+        condition: (expression
+          (identifier))
+        consequence: (block
+          (assignment_statement
+            (identifier)
+            (expression
+              (identifier))
+            (token)))))))
+
+================================================================================
+If-else with complex bodies
+================================================================================
+
+if test {
+  x = a + b;
+  y = x * 2;
+  draw(y);
+} else {
+  x = a - b;
+  stroke(x);
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (if_statement
+    condition: (expression
+      (identifier))
+    consequence: (block
+      (assignment_statement
+        (identifier)
+        (expression
+          (binary_expression
+            (expression
+              (identifier))
+            (operator)
+            (expression
+              (identifier))))
+        (token))
+      (assignment_statement
+        (identifier)
+        (expression
+          (binary_expression
+            (expression
+              (identifier))
+            (operator)
+            (expression
+              (number))))
+        (token))
+      (function_call
+        (function_name)
+        (function_args
+          (identifier))
+        (token)))
+    alternative: (else_clause
+      body: (block
+        (assignment_statement
+          (identifier)
+          (expression
+            (binary_expression
+              (expression
+                (identifier))
+              (expression
+                (unary_expression
+                  (operator)
+                  (expression
+                    (identifier))))))
+          (token))
+        (function_call
+          (function_name)
+          (function_args
+            (identifier))
+          (token))))))
+
+================================================================================
+Conditional expression
+================================================================================
+
+x = a if condition else b;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (binary_expression
+        (expression
+          (binary_expression
+            (expression
+              (binary_expression
+                (expression
+                  (binary_expression
+                    (expression
+                      (identifier))
+                    (expression
+                      (identifier))))
+                (expression
+                  (identifier))))
+            (expression
+              (identifier))))
+        (expression
+          (identifier))))))
+
+================================================================================
+Conditional expression with complex parts
+================================================================================
+
+result = (x + y) if (a > b) else (x - y);
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (conditional_expression
+        (expression
+          (parenthesized_expression
+            (expression
+              (binary_expression
+                (expression
+                  (identifier))
+                (operator)
+                (expression
+                  (identifier))))))
+        (expression
+          (parenthesized_expression
+            (expression
+              (binary_expression
+                (expression
+                  (identifier))
+                (operator)
+                (expression
+                  (identifier))))))
+        (expression
+          (parenthesized_expression
+            (expression
+              (binary_expression
+                (expression
+                  (identifier))
+                (expression
+                  (unary_expression
+                    (operator)
+                    (expression
+                      (identifier))))))))))
+    (token)))
+
+================================================================================
+If with empty body
+================================================================================
+
+if condition {
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (if_statement
+    condition: (expression
+      (identifier))
+    consequence: (block)))
+
+================================================================================
+If-else with empty bodies
+================================================================================
+
+if test {
+} else {
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (if_statement
+    condition: (expression
+      (identifier))
+    consequence: (block)
+    alternative: (else_clause
+      body: (block))))
