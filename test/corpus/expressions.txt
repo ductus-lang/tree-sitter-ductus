@@ -1,0 +1,12 @@
+==================
+Simple assignment
+==================
+u = 100;
+
+---
+
+(source_file
+  (assignment_statement
+    (identifier)
+    (expression
+      (number))))
