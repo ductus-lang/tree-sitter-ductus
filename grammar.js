@@ -11,6 +11,8 @@ module.exports = grammar({
   name: "chi",
   extras: (_) => ["\r", /\s/],
   word: ($) => $.identifier,
+  // supertypes: ($) => [$.expression],
+
   rules: {
     source_file: ($) => repeat($._statement),
 
@@ -20,11 +22,13 @@ module.exports = grammar({
       seq(
         sep($._simple_statement, $._semicolon),
         optional($._semicolon),
+        // Allow comment after semicolon
+        optional($.comment),
         $._newline,
       ),
 
     _simple_statement: ($) =>
-      choice($.comment, $.assignment_statement, $.function_call),
+      choice(prec.left($.comment), $.assignment_statement, $.function_call),
 
     assignment_statement: ($) =>
       seq($.identifier, "=", $.expression, $._semicolon),
@@ -32,7 +36,31 @@ module.exports = grammar({
     function_call: ($) =>
       seq($.function_name, "(", optional($.function_args), ")", $._semicolon),
 
-    expression: ($) => choice($.point, $.path),
+    expression: ($) =>
+      choice(
+        $.binary_expression,
+        $.unary_expression,
+        $.parenthesized_expression,
+        $.point,
+        $.path,
+        $.identifier,
+        $.number,
+      ),
+
+    binary_expression: ($) =>
+      choice(
+        prec.left(3, seq($.expression, alias("^", $.operator), $.expression)),
+        prec.left(2, seq($.expression, alias("*", $.operator), $.expression)),
+        // Multiplication does not need explicit operator.Example: 5u = 5*u
+        prec.left(2, seq($.expression, $.expression)),
+        prec.left(2, seq($.expression, alias("/", $.operator), $.expression)),
+        prec.left(1, seq($.expression, alias("+", $.operator), $.expression)),
+        prec.left(1, seq($.expression, alias("-", $.operator), $.expression)),
+      ),
+
+    unary_expression: ($) =>
+      choice(prec.left(2, seq(alias("-", $.operator), $.expression))),
+    parenthesized_expression: ($) => prec(10, seq("(", $.expression, ")")),
 
     // Paths and points
     path: ($) => sep1(choice($.identifier, $.point), $.connector),
@@ -40,10 +68,11 @@ module.exports = grammar({
     line_connector: ($) => "--",
     curve_connector: ($) => "..",
     point: ($) => seq("(", $.x, ",", $.y, ")"),
-    x: (_) => /\d+/,
-    y: (_) => /\d+/,
+    x: ($) => $.expression,
+    y: ($) => $.expression,
 
     // Signed float number
+    number: ($) => $._float,
     _float: (_) => /[+-]?([0-9]*[.])?[0-9]+/,
     _dir: (_) => choice("up", "down", "left", "right"),
     // _compound_statements  - loops and conditionals
