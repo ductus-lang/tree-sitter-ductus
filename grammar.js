@@ -37,18 +37,8 @@ module.exports = grammar({
     // Paths and points
     path: ($) => sep1(choice($.identifier, $.point), $.connector),
     connector: ($) => choice($.line_connector, $.curve_connector),
-    line_connector: (_) => "--",
-    curve_connector: ($) =>
-      seq(optional($.curve_start_options), "..", optional($.curve_end_options)),
-    curve_start_options: ($) => seq("[", sep($.option, ","), "]"),
-    curve_end_options: ($) => seq("[", sep($.option, ","), "]"),
-    option: ($) =>
-      seq(
-        alias(choice("dir", "tension"), $.option_name),
-        ":",
-        alias(choice($._dir, $._float), $.option_value),
-      ),
-
+    line_connector: ($) => "--",
+    curve_connector: ($) => "..",
     point: ($) => seq("(", $.x, ",", $.y, ")"),
     x: (_) => /\d+/,
     y: (_) => /\d+/,

@@ -210,8 +210,25 @@
       ]
     },
     "line_connector": {
-      "type": "STRING",
-      "value": "--"
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "node_options"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "STRING",
+          "value": "--"
+        }
+      ]
     },
     "curve_connector": {
       "type": "SEQ",
@@ -221,7 +238,7 @@
           "members": [
             {
               "type": "SYMBOL",
-              "name": "curve_start_options"
+              "name": "node_options"
             },
             {
               "type": "BLANK"
@@ -231,60 +248,10 @@
         {
           "type": "STRING",
           "value": ".."
-        },
-        {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "curve_end_options"
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
         }
       ]
     },
-    "curve_start_options": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "["
-        },
-        {
-          "type": "SEQ",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "option"
-            },
-            {
-              "type": "REPEAT",
-              "content": {
-                "type": "SEQ",
-                "members": [
-                  {
-                    "type": "STRING",
-                    "value": ","
-                  },
-                  {
-                    "type": "SYMBOL",
-                    "name": "option"
-                  }
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "type": "STRING",
-          "value": "]"
-        }
-      ]
-    },
-    "curve_end_options": {
+    "node_options": {
       "type": "SEQ",
       "members": [
         {
