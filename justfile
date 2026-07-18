@@ -29,6 +29,7 @@ see-lists: gen
     tree-sitter parse --cst examples/lists.chi -d| bat
 see-html: gen
     tree-sitter parse --cst examples/html.chi -d| bat
+
 test-bindings:
     # Ref https://github.com/tree-sitter/parser-test-action/
     cargo build --all-features
