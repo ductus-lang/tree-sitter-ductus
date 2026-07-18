@@ -1,0 +1,282 @@
+================================================================================
+Params block
+================================================================================
+
+params {
+  weight   = 400 in 100..900;
+  contrast = 0.85 in 0.6..1.0;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (params_block
+    (param_declaration
+      name: (identifier)
+      default: (number)
+      range: (range
+        min: (number)
+        max: (number)))
+    (param_declaration
+      name: (identifier)
+      default: (number)
+      range: (range
+        min: (number)
+        max: (number)))))
+
+================================================================================
+Metrics block
+================================================================================
+
+metrics {
+  upm = 1000;
+  x = 500; cap = 700;
+  over = 10 + weight / 200;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (metrics_block
+    (assignment
+      name: (identifier)
+      value: (number))
+    (assignment
+      name: (identifier)
+      value: (number))
+    (assignment
+      name: (identifier)
+      value: (number))
+    (assignment
+      name: (identifier)
+      value: (binary_expression
+        left: (number)
+        right: (binary_expression
+          left: (identifier)
+          right: (number))))))
+
+================================================================================
+Def with single return
+================================================================================
+
+def diamond(c, r) -> p {
+  p = c + (0, r) -- c + (r, 0) -- c + (0, -r) -- c + (-r, 0) -- cycle;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (def_declaration
+    name: (identifier)
+    parameters: (parameter_list
+      (identifier)
+      (identifier))
+    returns: (return_spec
+      (identifier))
+    body: (block
+      (assignment
+        name: (identifier)
+        value: (path
+          (path_segment
+            point: (binary_expression
+              left: (identifier)
+              right: (point
+                x: (number)
+                y: (identifier))))
+          (line_joint)
+          (path_segment
+            point: (binary_expression
+              left: (identifier)
+              right: (point
+                x: (identifier)
+                y: (number))))
+          (line_joint)
+          (path_segment
+            point: (binary_expression
+              left: (identifier)
+              right: (point
+                x: (number)
+                y: (unary_expression
+                  operand: (identifier)))))
+          (line_joint)
+          (path_segment
+            point: (binary_expression
+              left: (identifier)
+              right: (point
+                x: (unary_expression
+                  operand: (identifier))
+                y: (number))))
+          (line_joint)
+          (cycle))))))
+
+================================================================================
+Def with tuple return
+================================================================================
+
+def bowl(c, rx, ry) -> (n, w, s, e) {
+  node n = c + (0, ry) dir left width hair;
+  node e = c + (rx, 0) dir up width stem;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (def_declaration
+    name: (identifier)
+    parameters: (parameter_list
+      (identifier)
+      (identifier)
+      (identifier))
+    returns: (return_spec
+      (identifier)
+      (identifier)
+      (identifier)
+      (identifier))
+    body: (block
+      (node_declaration
+        name: (identifier)
+        position: (binary_expression
+          left: (identifier)
+          right: (point
+            x: (number)
+            y: (identifier)))
+        dir: (dir_clause
+          (identifier))
+        width: (width_clause
+          (identifier)))
+      (node_declaration
+        name: (identifier)
+        position: (binary_expression
+          left: (identifier)
+          right: (point
+            x: (identifier)
+            y: (number)))
+        dir: (dir_clause
+          (identifier))
+        width: (width_clause
+          (identifier))))))
+
+================================================================================
+Glyph block
+================================================================================
+
+glyph o : U+006F {
+  advance = 2 stem + 380;
+  contour outer = n.right .. e.right .. s.right .. w.right .. cycle;
+  guide spine = n.pos .. e.pos;
+  anchor top = (advance / 2, x + over);
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (glyph_block
+    name: (identifier)
+    unicode: (unicode)
+    (assignment
+      name: (identifier)
+      value: (binary_expression
+        left: (implicit_multiplication
+          left: (number)
+          right: (identifier))
+        right: (number)))
+    (contour_declaration
+      name: (identifier)
+      value: (path
+        (path_segment
+          point: (member_expression
+            object: (identifier)
+            property: (identifier)))
+        (curve_joint)
+        (path_segment
+          point: (member_expression
+            object: (identifier)
+            property: (identifier)))
+        (curve_joint)
+        (path_segment
+          point: (member_expression
+            object: (identifier)
+            property: (identifier)))
+        (curve_joint)
+        (path_segment
+          point: (member_expression
+            object: (identifier)
+            property: (identifier)))
+        (curve_joint)
+        (cycle)))
+    (guide_declaration
+      name: (identifier)
+      value: (path
+        (path_segment
+          point: (member_expression
+            object: (identifier)
+            property: (identifier)))
+        (curve_joint)
+        (path_segment
+          point: (member_expression
+            object: (identifier)
+            property: (identifier)))))
+    (anchor_declaration
+      name: (identifier)
+      value: (point
+        x: (binary_expression
+          left: (identifier)
+          right: (number))
+        y: (binary_expression
+          left: (identifier)
+          right: (identifier))))))
+
+================================================================================
+Glyph with string name and no codepoint
+================================================================================
+
+glyph "ka.mlym" {
+  advance = 500;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (glyph_block
+    name: (string)
+    (assignment
+      name: (identifier)
+      value: (number))))
+
+================================================================================
+Glyph with destructuring and local bindings
+================================================================================
+
+glyph l : U+006C {
+  advance = stem + 190;
+  lsb = (advance - stem) / 2;
+  (a, b) = ends(lsb);
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (glyph_block
+    name: (identifier)
+    unicode: (unicode)
+    (assignment
+      name: (identifier)
+      value: (binary_expression
+        left: (identifier)
+        right: (number)))
+    (assignment
+      name: (identifier)
+      value: (binary_expression
+        left: (parenthesized_expression
+          (binary_expression
+            left: (identifier)
+            right: (identifier)))
+        right: (number)))
+    (destructuring_assignment
+      pattern: (tuple_pattern
+        (identifier)
+        (identifier))
+      value: (call_expression
+        function: (identifier)
+        arguments: (arguments
+          (identifier))))))

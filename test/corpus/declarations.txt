@@ -1,0 +1,185 @@
+================================================================================
+Node declaration
+================================================================================
+
+node n = (x, y) dir theta width w;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (node_declaration
+    name: (identifier)
+    position: (point
+      x: (identifier)
+      y: (identifier))
+    dir: (dir_clause
+      (identifier))
+    width: (width_clause
+      (identifier))))
+
+================================================================================
+Node with expression position and direction constant
+================================================================================
+
+node w = c + (-rx, 0) dir down width stem;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (node_declaration
+    name: (identifier)
+    position: (binary_expression
+      left: (identifier)
+      right: (point
+        x: (unary_expression
+          operand: (identifier))
+        y: (number)))
+    dir: (dir_clause
+      (identifier))
+    width: (width_clause
+      (identifier))))
+
+================================================================================
+Node with asymmetric width
+================================================================================
+
+node m = (x, y) dir theta width (wl, wr);
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (node_declaration
+    name: (identifier)
+    position: (point
+      x: (identifier)
+      y: (identifier))
+    dir: (dir_clause
+      (identifier))
+    width: (width_clause
+      (point
+        x: (identifier)
+        y: (identifier)))))
+
+================================================================================
+Node with nib angle
+================================================================================
+
+node k = (x, y) dir theta width w nib phi;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (node_declaration
+    name: (identifier)
+    position: (point
+      x: (identifier)
+      y: (identifier))
+    dir: (dir_clause
+      (identifier))
+    width: (width_clause
+      (identifier))
+    nib: (nib_clause
+      (identifier))))
+
+================================================================================
+Destructuring assignment
+================================================================================
+
+(n, w, s, e) = bowl(c, rx, ry);
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (destructuring_assignment
+    pattern: (tuple_pattern
+      (identifier)
+      (identifier)
+      (identifier)
+      (identifier))
+    value: (call_expression
+      function: (identifier)
+      arguments: (arguments
+        (identifier)
+        (identifier)
+        (identifier)))))
+
+================================================================================
+Import statement
+================================================================================
+
+import "measures.chi";
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (import_statement
+    path: (string)))
+
+================================================================================
+List literal
+================================================================================
+
+xs = [a, b, c];
+empty = [];
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment
+    name: (identifier)
+    value: (list
+      (identifier)
+      (identifier)
+      (identifier)))
+  (assignment
+    name: (identifier)
+    value: (list)))
+
+================================================================================
+For over a range
+================================================================================
+
+for i in 0..3 {
+  draw(p);
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (for_statement
+    name: (identifier)
+    iterable: (range
+      min: (number)
+      max: (number))
+    body: (block
+      (call_statement
+        (call_expression
+          function: (identifier)
+          arguments: (arguments
+            (identifier)))))))
+
+================================================================================
+For over a list
+================================================================================
+
+for g in [a, b, c] {
+  q = g shifted (i, 0);
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (for_statement
+    name: (identifier)
+    iterable: (list
+      (identifier)
+      (identifier)
+      (identifier))
+    body: (block
+      (assignment
+        name: (identifier)
+        value: (transform_expression
+          operand: (identifier)
+          argument: (point
+            x: (identifier)
+            y: (number)))))))

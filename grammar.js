@@ -32,17 +32,161 @@ module.exports = grammar({
   conflicts: ($) => [[$._expression, $._implicit_operand]],
 
   rules: {
-    source_file: ($) => repeat($._statement),
+    source_file: ($) => repeat($._top_statement),
 
-    _statement: ($) => choice($.assignment, $.call_statement),
+    // Blocks and macro/glyph definitions exist only at the top level.
+    _top_statement: ($) =>
+      choice(
+        $.params_block,
+        $.metrics_block,
+        $.def_declaration,
+        $.glyph_block,
+        $.import_statement,
+        $._statement,
+      ),
+
+    _statement: ($) =>
+      choice(
+        $.assignment,
+        $.destructuring_assignment,
+        $.node_declaration,
+        $.call_statement,
+        $.for_statement,
+      ),
 
     assignment: ($) =>
       seq(field("name", $.identifier), "=", field("value", $._value), ";"),
 
+    destructuring_assignment: ($) =>
+      seq(
+        field("pattern", $.tuple_pattern),
+        "=",
+        field("value", $._expression),
+        ";",
+      ),
+
+    tuple_pattern: ($) =>
+      seq("(", $.identifier, repeat1(seq(",", $.identifier)), ")"),
+
+    node_declaration: ($) =>
+      seq(
+        "node",
+        field("name", $.identifier),
+        "=",
+        field("position", $._expression),
+        field("dir", $.dir_clause),
+        field("width", $.width_clause),
+        optional(field("nib", $.nib_clause)),
+        ";",
+      ),
+
+    dir_clause: ($) => seq("dir", $._expression),
+
+    width_clause: ($) => seq("width", $._expression),
+
+    nib_clause: ($) => seq("nib", $._expression),
+
     call_statement: ($) => seq($.call_expression, ";"),
 
-    // The right-hand side of a binding or a call argument.
-    _value: ($) => choice($._expression, $.path),
+    for_statement: ($) =>
+      seq(
+        "for",
+        field("name", $.identifier),
+        "in",
+        field("iterable", choice($.range, $.list, $._expression)),
+        field("body", $.block),
+      ),
+
+    import_statement: ($) => seq("import", field("path", $.string), ";"),
+
+    block: ($) => seq("{", repeat($._statement), "}"),
+
+    // ---- Top-level blocks ----------------------------------------------
+
+    params_block: ($) => seq("params", "{", repeat($.param_declaration), "}"),
+
+    param_declaration: ($) =>
+      seq(
+        field("name", $.identifier),
+        "=",
+        field("default", $._expression),
+        "in",
+        field("range", $.range),
+        ";",
+      ),
+
+    range: ($) =>
+      seq(field("min", $._expression), "..", field("max", $._expression)),
+
+    metrics_block: ($) => seq("metrics", "{", repeat($.assignment), "}"),
+
+    def_declaration: ($) =>
+      seq(
+        "def",
+        field("name", $.identifier),
+        field("parameters", $.parameter_list),
+        "->",
+        field("returns", $.return_spec),
+        field("body", $.block),
+      ),
+
+    parameter_list: ($) =>
+      seq("(", optional(sep1($.identifier, ",")), ")"),
+
+    return_spec: ($) =>
+      choice($.identifier, seq("(", sep1($.identifier, ","), ")")),
+
+    glyph_block: ($) =>
+      seq(
+        "glyph",
+        field("name", choice($.identifier, $.string)),
+        optional(seq(":", field("unicode", $.unicode))),
+        "{",
+        repeat($._glyph_statement),
+        "}",
+      ),
+
+    _glyph_statement: ($) =>
+      choice(
+        $._statement,
+        $.contour_declaration,
+        $.guide_declaration,
+        $.anchor_declaration,
+      ),
+
+    contour_declaration: ($) =>
+      seq(
+        "contour",
+        field("name", $.identifier),
+        "=",
+        field("value", $._value),
+        ";",
+      ),
+
+    guide_declaration: ($) =>
+      seq(
+        "guide",
+        field("name", $.identifier),
+        "=",
+        field("value", $._value),
+        ";",
+      ),
+
+    anchor_declaration: ($) =>
+      seq(
+        "anchor",
+        field("name", $.identifier),
+        "=",
+        field("value", $._expression),
+        ";",
+      ),
+
+    // The right-hand side of a binding or a call argument. A list literal is
+    // a top-level value, kept out of `_expression` so that after any
+    // expression `[` can only mean mediation `t[a,b]`, never a fresh list.
+    _value: ($) => choice($._expression, $.path, $.list),
+
+    list: ($) => seq("[", optional(sep1($._expression, ",")), "]"),
 
     // ---- Paths -------------------------------------------------------------
 
@@ -237,6 +381,10 @@ module.exports = grammar({
     // ---- Terminals ---------------------------------------------------------
 
     number: (_) => /([0-9]*\.)?[0-9]+/,
+
+    string: (_) => token(seq('"', /[^"]*/, '"')),
+
+    unicode: (_) => /U\+[0-9A-Fa-f]+/,
 
     identifier: (_) => /[a-zA-Z_][a-zA-Z0-9_]*/,
 
