@@ -1,5 +1,5 @@
 /**
- * @file chi language syntax
+ * @file Chi — a DSL for parametric type design
  * @author Santhosh Thottingal <santhosh.thottingal@gmail.com>
  * @license MIT
  */
@@ -7,132 +7,223 @@
 /// <reference types="tree-sitter-cli/dsl" />
 // @ts-check
 
+const PREC = {
+  CONDITIONAL: 1,
+  OR: 2,
+  AND: 3,
+  NOT: 4,
+  COMPARE: 5,
+  ADD: 6,
+  MUL: 7,
+  UNARY: 8,
+  POW: 9,
+  POSTFIX: 10,
+};
+
 module.exports = grammar({
   name: "chi",
-  extras: (_) => ["\r", /\s/],
+
+  extras: ($) => [/\s/, $.comment],
+
   word: ($) => $.identifier,
-  // supertypes: ($) => [$.expression],
+
+  // `2 u` — after the number, an identifier could reduce through
+  // `_expression` (a dead end) or `_implicit_operand`; only GLR can tell.
+  conflicts: ($) => [[$._expression, $._implicit_operand]],
 
   rules: {
     source_file: ($) => repeat($._statement),
 
-    _statement: ($) => choice($._simple_statements, $._compound_statement),
+    _statement: ($) => choice($.assignment, $.call_statement),
 
-    _simple_statements: ($) =>
-      seq(
-        sep($._simple_statement, $._semicolon),
-        optional($._semicolon),
-        // Allow comment after semicolon
-        optional($.comment),
-        $._newline,
-      ),
+    assignment: ($) =>
+      seq(field("name", $.identifier), "=", field("value", $._value), ";"),
 
-    _simple_statement: ($) =>
-      choice(prec.left($.comment), $.assignment_statement, $.function_call),
+    call_statement: ($) => seq($.call_expression, ";"),
 
-    assignment_statement: ($) =>
-      seq($.identifier, "=", $.expression, $._semicolon),
+    // The right-hand side of a binding: an expression now; paths join later.
+    _value: ($) => $._expression,
 
-    function_call: ($) =>
-      seq($.function_name, "(", optional($.function_args), ")", $._semicolon),
+    // ---- Expressions -----------------------------------------------------
 
-    expression: ($) =>
+    _expression: ($) =>
       choice(
+        $.conditional_expression,
         $.binary_expression,
         $.unary_expression,
+        $.implicit_multiplication,
+        $.mediation,
+        $.member_expression,
+        $.transform_expression,
+        $.call_expression,
         $.parenthesized_expression,
         $.point,
-        $.path,
-        $.identifier,
         $.number,
+        $.identifier,
       ),
 
-    binary_expression: ($) =>
-      choice(
-        prec.left(3, seq($.expression, alias("^", $.operator), $.expression)),
-        prec.left(2, seq($.expression, alias("*", $.operator), $.expression)),
-        // Multiplication does not need explicit operator.Example: 5u = 5*u
-        prec.left(2, seq($.expression, $.expression)),
-        prec.left(2, seq($.expression, alias("/", $.operator), $.expression)),
-        prec.left(1, seq($.expression, alias("+", $.operator), $.expression)),
-        prec.left(1, seq($.expression, alias("-", $.operator), $.expression)),
+    conditional_expression: ($) =>
+      prec.right(
+        PREC.CONDITIONAL,
+        seq(
+          field("value", $._expression),
+          "if",
+          field("condition", $._expression),
+          "else",
+          field("alternative", $._expression),
+        ),
       ),
+
+    binary_expression: ($) => {
+      /** @type {[number, RuleOrLiteral][]} */
+      const levels = [
+        [PREC.OR, "or"],
+        [PREC.AND, "and"],
+        [PREC.COMPARE, choice("<", "<=", ">", ">=", "==", "!=")],
+        [PREC.ADD, choice("+", "-")],
+        [PREC.MUL, choice("*", "/")],
+      ];
+      return choice(
+        ...levels.map(([level, operator]) =>
+          prec.left(
+            level,
+            seq(
+              field("left", $._expression),
+              field("operator", operator),
+              field("right", $._expression),
+            ),
+          ),
+        ),
+        prec.right(
+          PREC.POW,
+          seq(
+            field("left", $._expression),
+            field("operator", "^"),
+            field("right", $._expression),
+          ),
+        ),
+      );
+    },
 
     unary_expression: ($) =>
-      choice(prec.left(2, seq(alias("-", $.operator), $.expression))),
-    parenthesized_expression: ($) => prec(10, seq("(", $.expression, ")")),
-
-    // Paths and points
-    path: ($) => sep1(choice($.identifier, $.point), $.connector),
-    connector: ($) => choice($.line_connector, $.curve_connector),
-    line_connector: ($) => "--",
-    curve_connector: ($) => "..",
-    point: ($) => seq("(", $.x, ",", $.y, ")"),
-    x: ($) => $.expression,
-    y: ($) => $.expression,
-
-    // Signed float number
-    number: ($) => $._float,
-    _float: (_) => /[+-]?([0-9]*[.])?[0-9]+/,
-    _dir: (_) => choice("up", "down", "left", "right"),
-    // _compound_statements  - loops and conditionals
-    _compound_statement: ($) => choice($.if_statement, $.for_statement),
-    if_statement: ($) =>
-      seq(
-        "if",
-        field("condition", $.expression),
-        "{",
-        field("consequence", $._suite),
-        optional(field("alternative", $.else_clause)),
-        "}",
+      choice(
+        prec(
+          PREC.UNARY,
+          seq(field("operator", "-"), field("operand", $._expression)),
+        ),
+        prec(
+          PREC.NOT,
+          seq(field("operator", "not"), field("operand", $._expression)),
+        ),
       ),
-    if_clause: ($) => seq("if", $.expression),
-    else_clause: ($) => seq("else", "{", field("body", $._suite), "}"),
-    for_statement: ($) =>
-      seq(
-        "for",
-        field("left", $.expression),
-        "in",
-        field("right", $.expression),
-        "{",
-        field("body", $._suite),
-        "}",
+
+    // `2u`, `3 stem`, `2(a + b)` — a number literal followed by a primary
+    // expression multiplies. The operand set excludes numbers and operators
+    // so `2 3` and `2 -x` stay syntax errors.
+    implicit_multiplication: ($) =>
+      prec.left(
+        PREC.MUL,
+        seq(field("left", $.number), field("right", $._implicit_operand)),
       ),
-    _suite: ($) =>
-      choice(alias($._simple_statements, $.block), alias($._newline, $.block)),
-    conditional_expression: ($) =>
-      prec.right(seq($.expression, "if", $.expression, "else", $.expression)),
+
+    _implicit_operand: ($) =>
+      choice(
+        $.identifier,
+        $.call_expression,
+        $.member_expression,
+        $.mediation,
+        $.parenthesized_expression,
+        $.point,
+      ),
+
+    // t[a, b] = a + t*(b - a)
+    mediation: ($) =>
+      prec.left(
+        PREC.POSTFIX,
+        seq(
+          field("t", $._expression),
+          "[",
+          field("a", $._expression),
+          ",",
+          field("b", $._expression),
+          "]",
+        ),
+      ),
+
+    member_expression: ($) =>
+      prec.left(
+        PREC.POSTFIX,
+        seq(
+          field("object", $._expression),
+          ".",
+          field("property", $.identifier),
+        ),
+      ),
+
+    transform_expression: ($) =>
+      choice(
+        prec.left(
+          PREC.POSTFIX,
+          seq(
+            field("operand", $._expression),
+            field(
+              "transform",
+              choice(
+                "shifted",
+                "scaled",
+                "xscaled",
+                "yscaled",
+                "rotated",
+                "slanted",
+              ),
+            ),
+            field("argument", $._expression),
+          ),
+        ),
+        prec.left(
+          PREC.POSTFIX,
+          seq(field("operand", $._expression), field("transform", "reversed")),
+        ),
+      ),
+
+    call_expression: ($) =>
+      seq(
+        field("function", $.identifier),
+        "(",
+        optional(field("arguments", $.arguments)),
+        ")",
+      ),
+
+    arguments: ($) => sep1($._value, ","),
+
+    parenthesized_expression: ($) => seq("(", $._expression, ")"),
+
+    point: ($) =>
+      seq(
+        "(",
+        field("x", $._expression),
+        ",",
+        field("y", $._expression),
+        ")",
+      ),
+
+    // ---- Terminals ---------------------------------------------------------
+
+    number: (_) => /([0-9]*\.)?[0-9]+/,
+
+    identifier: (_) => /[a-zA-Z_][a-zA-Z0-9_]*/,
+
     comment: (_) => token(seq("#", /.*/)),
-
-    identifier: (_) => /[a-zA-Z][a-zA-Z0-9_]*/,
-
-    function_name: ($) => prec(-3, choice("draw", "stroke", "save")),
-
-    function_args: ($) => sep($.identifier, ","),
-
-    // extra
-    _newline: ($) => /\n+/,
-
-    _semicolon: ($) => token(";"),
-
-    true: (_) => "True",
-    false: (_) => "False",
-    none: (_) => "None",
   },
 });
 
 /**
- * Creates a rule to match one or more occurrences of `rule` separated by `sep`
+ * One or more occurrences of `rule` separated by `separator`.
  *
  * @param {RuleOrLiteral} rule
- *
  * @param {RuleOrLiteral} separator
- *
  * @returns {SeqRule}
  */
-function sep(rule, separator) {
-  return seq(rule, repeat(seq(separator, rule)));
-}
 function sep1(rule, separator) {
-  return seq(rule, repeat1(seq(separator, rule)));
+  return seq(rule, repeat(seq(separator, rule)));
 }
