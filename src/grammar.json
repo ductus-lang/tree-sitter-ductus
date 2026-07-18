@@ -1431,14 +1431,6 @@
         },
         {
           "type": "SYMBOL",
-          "name": "member_expression"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "mediation"
-        },
-        {
-          "type": "SYMBOL",
           "name": "parenthesized_expression"
         },
         {
@@ -1780,12 +1772,7 @@
       "name": "comment"
     }
   ],
-  "conflicts": [
-    [
-      "_expression",
-      "_implicit_operand"
-    ]
-  ],
+  "conflicts": [],
   "precedences": [],
   "externals": [],
   "inline": [],

@@ -113,6 +113,33 @@ q = 3 stem + 380;
       right: (number))))
 
 ================================================================================
+Subtraction after a number literal
+================================================================================
+
+a = 2 - 5;
+b = advance / 2 - 55 - stem / 2;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment
+    name: (identifier)
+    value: (binary_expression
+      left: (number)
+      right: (number)))
+  (assignment
+    name: (identifier)
+    value: (binary_expression
+      left: (binary_expression
+        left: (binary_expression
+          left: (identifier)
+          right: (number))
+        right: (number))
+      right: (binary_expression
+        left: (identifier)
+        right: (number)))))
+
+================================================================================
 Point literal and parenthesized expression
 ================================================================================
 

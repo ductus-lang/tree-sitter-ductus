@@ -27,10 +27,6 @@ module.exports = grammar({
 
   word: ($) => $.identifier,
 
-  // `2 u` — after the number, an identifier could reduce through
-  // `_expression` (a dead end) or `_implicit_operand`; only GLR can tell.
-  conflicts: ($) => [[$._expression, $._implicit_operand]],
-
   rules: {
     source_file: ($) => repeat($._top_statement),
 
@@ -289,8 +285,11 @@ module.exports = grammar({
       ),
 
     // `2u`, `3 stem`, `2(a + b)` — a number literal followed by a primary
-    // expression multiplies. The operand set excludes numbers and operators
-    // so `2 3` and `2 -x` stay syntax errors.
+    // multiplies. The operand set is limited to primaries that begin with a
+    // concrete token (identifier, `(`): rules that begin with a general
+    // expression (member access, mediation) are excluded, otherwise their
+    // leading unary `-` would make `2 - a` ambiguous with subtraction. For
+    // those, write the explicit `*` (e.g. `2 * a.b`).
     implicit_multiplication: ($) =>
       prec.left(
         PREC.MUL,
@@ -301,8 +300,6 @@ module.exports = grammar({
       choice(
         $.identifier,
         $.call_expression,
-        $.member_expression,
-        $.mediation,
         $.parenthesized_expression,
         $.point,
       ),
