@@ -1,0 +1,279 @@
+================================================================================
+Line path
+================================================================================
+
+p = a -- b;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment
+    name: (identifier)
+    value: (path
+      (path_segment
+        point: (identifier))
+      (line_joint)
+      (path_segment
+        point: (identifier)))))
+
+================================================================================
+Curve path
+================================================================================
+
+p = z0 .. z1 .. z2;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment
+    name: (identifier)
+    value: (path
+      (path_segment
+        point: (identifier))
+      (curve_joint)
+      (path_segment
+        point: (identifier))
+      (curve_joint)
+      (path_segment
+        point: (identifier)))))
+
+================================================================================
+Mixed joints
+================================================================================
+
+p = a .. b -- c .. d;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment
+    name: (identifier)
+    value: (path
+      (path_segment
+        point: (identifier))
+      (curve_joint)
+      (path_segment
+        point: (identifier))
+      (line_joint)
+      (path_segment
+        point: (identifier))
+      (curve_joint)
+      (path_segment
+        point: (identifier)))))
+
+================================================================================
+Direction specs
+================================================================================
+
+p = a {up} .. {left} b {down} .. {45} c;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment
+    name: (identifier)
+    value: (path
+      (path_segment
+        point: (identifier)
+        leave: (direction_spec
+          (identifier)))
+      (curve_joint)
+      (path_segment
+        enter: (direction_spec
+          (identifier))
+        point: (identifier)
+        leave: (direction_spec
+          (identifier)))
+      (curve_joint)
+      (path_segment
+        enter: (direction_spec
+          (number))
+        point: (identifier)))))
+
+================================================================================
+Direction from an expression
+================================================================================
+
+p = a {angle(b - a)} .. {theta + 90} b;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment
+    name: (identifier)
+    value: (path
+      (path_segment
+        point: (identifier)
+        leave: (direction_spec
+          (call_expression
+            function: (identifier)
+            arguments: (arguments
+              (binary_expression
+                left: (identifier)
+                right: (identifier))))))
+      (curve_joint)
+      (path_segment
+        enter: (direction_spec
+          (binary_expression
+            left: (identifier)
+            right: (number)))
+        point: (identifier)))))
+
+================================================================================
+Corner point
+================================================================================
+
+p = a .. tip{corner} .. b;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment
+    name: (identifier)
+    value: (path
+      (path_segment
+        point: (identifier))
+      (curve_joint)
+      (path_segment
+        point: (identifier)
+        leave: (direction_spec
+          (corner)))
+      (curve_joint)
+      (path_segment
+        point: (identifier)))))
+
+================================================================================
+Closed path
+================================================================================
+
+c = n.right .. e.right .. s.right .. w.right .. cycle;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment
+    name: (identifier)
+    value: (path
+      (path_segment
+        point: (member_expression
+          object: (identifier)
+          property: (identifier)))
+      (curve_joint)
+      (path_segment
+        point: (member_expression
+          object: (identifier)
+          property: (identifier)))
+      (curve_joint)
+      (path_segment
+        point: (member_expression
+          object: (identifier)
+          property: (identifier)))
+      (curve_joint)
+      (path_segment
+        point: (member_expression
+          object: (identifier)
+          property: (identifier)))
+      (curve_joint)
+      (cycle))))
+
+================================================================================
+Closed line contour with point literals
+================================================================================
+
+box = (lsb, 0) -- (lsb + stem, 0) -- (lsb + stem, asc) -- (lsb, asc) -- cycle;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment
+    name: (identifier)
+    value: (path
+      (path_segment
+        point: (point
+          x: (identifier)
+          y: (number)))
+      (line_joint)
+      (path_segment
+        point: (point
+          x: (binary_expression
+            left: (identifier)
+            right: (identifier))
+          y: (number)))
+      (line_joint)
+      (path_segment
+        point: (point
+          x: (binary_expression
+            left: (identifier)
+            right: (identifier))
+          y: (identifier)))
+      (line_joint)
+      (path_segment
+        point: (point
+          x: (identifier)
+          y: (identifier)))
+      (line_joint)
+      (cycle))))
+
+================================================================================
+Path as a call argument
+================================================================================
+
+draw(a .. b);
+draw(p, q -- r);
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (call_statement
+    (call_expression
+      function: (identifier)
+      arguments: (arguments
+        (path
+          (path_segment
+            point: (identifier))
+          (curve_joint)
+          (path_segment
+            point: (identifier))))))
+  (call_statement
+    (call_expression
+      function: (identifier)
+      arguments: (arguments
+        (identifier)
+        (path
+          (path_segment
+            point: (identifier))
+          (line_joint)
+          (path_segment
+            point: (identifier)))))))
+
+================================================================================
+Nudged derived points in a path
+================================================================================
+
+p = n.left + (3, 0) .. 0.5[a, b] .. s.pos;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment
+    name: (identifier)
+    value: (path
+      (path_segment
+        point: (binary_expression
+          left: (member_expression
+            object: (identifier)
+            property: (identifier))
+          right: (point
+            x: (number)
+            y: (number))))
+      (curve_joint)
+      (path_segment
+        point: (mediation
+          t: (number)
+          a: (identifier)
+          b: (identifier)))
+      (curve_joint)
+      (path_segment
+        point: (member_expression
+          object: (identifier)
+          property: (identifier))))))

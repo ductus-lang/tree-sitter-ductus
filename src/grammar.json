@@ -66,8 +66,151 @@
       ]
     },
     "_value": {
-      "type": "SYMBOL",
-      "name": "_expression"
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "path"
+        }
+      ]
+    },
+    "path": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "path_segment"
+        },
+        {
+          "type": "REPEAT1",
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "_joint"
+              },
+              {
+                "type": "CHOICE",
+                "members": [
+                  {
+                    "type": "SYMBOL",
+                    "name": "path_segment"
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "cycle"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "path_segment": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "FIELD",
+              "name": "enter",
+              "content": {
+                "type": "SYMBOL",
+                "name": "direction_spec"
+              }
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "FIELD",
+          "name": "point",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_expression"
+          }
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "FIELD",
+              "name": "leave",
+              "content": {
+                "type": "SYMBOL",
+                "name": "direction_spec"
+              }
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
+    },
+    "_joint": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "line_joint"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "curve_joint"
+        }
+      ]
+    },
+    "line_joint": {
+      "type": "STRING",
+      "value": "--"
+    },
+    "curve_joint": {
+      "type": "STRING",
+      "value": ".."
+    },
+    "direction_spec": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "{"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_expression"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "corner"
+            }
+          ]
+        },
+        {
+          "type": "STRING",
+          "value": "}"
+        }
+      ]
+    },
+    "corner": {
+      "type": "STRING",
+      "value": "corner"
+    },
+    "cycle": {
+      "type": "STRING",
+      "value": "cycle"
     },
     "_expression": {
       "type": "CHOICE",

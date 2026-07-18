@@ -41,8 +41,35 @@ module.exports = grammar({
 
     call_statement: ($) => seq($.call_expression, ";"),
 
-    // The right-hand side of a binding: an expression now; paths join later.
-    _value: ($) => $._expression,
+    // The right-hand side of a binding or a call argument.
+    _value: ($) => choice($._expression, $.path),
+
+    // ---- Paths -------------------------------------------------------------
+
+    path: ($) =>
+      seq(
+        $.path_segment,
+        repeat1(seq($._joint, choice($.path_segment, $.cycle))),
+      ),
+
+    path_segment: ($) =>
+      seq(
+        optional(field("enter", $.direction_spec)),
+        field("point", $._expression),
+        optional(field("leave", $.direction_spec)),
+      ),
+
+    _joint: ($) => choice($.line_joint, $.curve_joint),
+
+    line_joint: (_) => "--",
+
+    curve_joint: (_) => "..",
+
+    direction_spec: ($) => seq("{", choice($._expression, $.corner), "}"),
+
+    corner: (_) => "corner",
+
+    cycle: (_) => "cycle",
 
     // ---- Expressions -----------------------------------------------------
 
