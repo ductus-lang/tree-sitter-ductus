@@ -255,6 +255,27 @@ n.right = n.pos − x*
 With `height > 0`, `left` is always the geometric left bank of travel. With
 `height = 0` the legacy fixed-axis rule applies (offsets `a` along `angle`).
 
+**Thin crossings.** Where the travel direction crosses the pen's major
+axis, the edge points swing to the other end of the pen within a few
+degrees of travel (the swing zone is roughly `atan(height / width)` wide).
+The fitter only knows the on-curve points the source writes, so bank
+splines between nodes that merely *bracket* the crossing cut straight
+across at full width instead of pinching. Place a witness node where the
+skeleton's tangent equals the pen angle — its banks are exactly `height`
+apart, and a direction constraint makes the waist tangent to travel:
+
+```
+node w = (1.5u, 8.5u) dir 45 pen main;      # travel parallel to pen axis
+contour ... n.right .. {w.dir} w.right .. o.right ...
+        ... o.left .. {w.dir + 180} w.left .. n.left ...
+```
+
+This mirrors placing points at extrema in ordinary outline design: a
+feature narrower than the sampling must be witnessed by a point. (The
+legacy `width`/`nib` razor never needs this because its banks are the
+skeleton translated by a constant vector, which sparse samples reproduce
+exactly — a special property of the degenerate pen.)
+
 **Terminals.** Pen nodes expose two more derived points: `n.tip`, the
 support point along `+dir` (the front of the pen), and `n.tail` (along
 `−dir`). Both are errors on razor (`height = 0`) and width/nib nodes, where
