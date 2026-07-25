@@ -46,7 +46,7 @@ one path expression).
 - **Unicode literals:** `U+0D15` (`U+` followed by hex digits). Only in glyph
   headers.
 - **Keywords:** `params in glyph contour guide anchor node dir width nib
-  cycle corner def for if else and or not import shifted scaled xscaled
+  pen cycle corner def for if else and or not import shifted scaled xscaled
   yscaled rotated slanted reversed metrics draw fill`
 - **Direction constants:** `right = 0`, `up = 90`, `left = 180`, `down = 270`.
   These are ordinary numeric bindings in the prelude, not syntax. All angles in
@@ -61,7 +61,8 @@ Chi is dynamically typed; type errors are reported at evaluation time.
 |-----------|----------------------------------------|-------|
 | number    | `12`, `0.5`                            | Also used for angles (degrees). |
 | point     | `(x, y)`                               | Doubles as a 2-D vector. |
-| node      | `node` statement                       | Position + direction + width (+ nib). |
+| node      | `node` statement                       | Position + direction + width (+ nib), or + pen. |
+| pen       | `pen` block                            | Ellipse: width, height, angle (§6.1). |
 | path      | `a .. b -- c`                          | Open or closed (ends with `cycle`). |
 | transform | built by postfix operators             | Affine 2×3. Rarely named explicitly. |
 | tuple     | `def` return only                      | Destructured at the call site; not a general value. |
@@ -212,6 +213,73 @@ n.right = n.pos - wr * unitvec(nib)
 Nodes never render by themselves; the designer writes contours through the
 derived points and may freely adjust them (`n.left + (3, 0)`).
 
+### 6.1 Pens
+
+A pen names a nib as a single design artifact — an ellipse:
+
+```
+pen italic {
+  width  = 120;   # full major axis; required
+  height = 12;    # full minor axis; optional, default 0
+  angle  = 30;    # major-axis orientation, degrees; optional, default 0
+}
+
+node m = (x, y) dir theta pen italic;
+```
+
+Field values are ordinary expressions (they may reference params), so a pen
+interpolates across the design space. The block binds `italic` to a
+first-class pen value: it can be passed to `def` macros. A node takes
+**either** `width` (optionally with `nib`) **or** `pen` — never both. A pen
+is a rule for deriving a node's edge points, not stroke expansion: contours
+are still written through the derived points, and the outline-first
+principles (§1) are unchanged.
+
+A circle (`height = width`) is a monoline pen. `height = 0` (the default)
+is a razor: `pen x { width = w; angle = phi; }` on a node behaves exactly
+like `width w nib phi`. A small nonzero `height` is a *realistic* razor —
+where the travel direction becomes parallel to the nib, stroke thickness
+bottoms out at `height` instead of collapsing to zero.
+
+**Edge points.** For semi-axes `a = width/2`, `b = height/2` and a node
+traveling at `dir`, the edges are the ellipse's support points along the
+left normal `n = unitvec(dir + 90)`:
+
+```
+x*      = R(angle) · (a²·cos ψ, b²·sin ψ) / h     where ψ = dir + 90 − angle
+h       = sqrt(a²·cos²ψ + b²·sin²ψ)               # half thickness ⊥ travel
+n.left  = n.pos + x*
+n.right = n.pos − x*
+```
+
+With `height > 0`, `left` is always the geometric left bank of travel. With
+`height = 0` the legacy fixed-axis rule applies (offsets `a` along `angle`).
+
+**Terminals.** Pen nodes expose two more derived points: `n.tip`, the
+support point along `+dir` (the front of the pen), and `n.tail` (along
+`−dir`). Both are errors on razor (`height = 0`) and width/nib nodes, where
+the front point is undefined. The ellipse's tangent at the support point for
+direction `v` is perpendicular to `v`, so a terminal that traces the pen is
+three points with known direction constraints:
+
+```
+... n.right {n.dir} .. {n.dir + 90} n.tip .. {n.dir + 180} n.left ...
+```
+
+There are no automatic caps — a terminal is outline like any other (§1), and
+cut terminals, teardrops and ink traps remain ordinary edits.
+
+**Joints.** The outer shoulder of a joint between two travel directions is
+the pen traced between their edge points: place a node at the same position
+with an intermediate direction and write through it —
+
+```
+node k2 = k.pos dir 0.5[t1, t2] pen p;
+contour ... k.right .. k2.right .. ...
+```
+
+The inner side of a joint is an `intersection()` of the two banks.
+
 **Winding convention:** traverse a closed skeleton counterclockwise and the
 `right` points form the outer contour (counterclockwise), the `left` points —
 taken in reverse order — form the inner contour (clockwise). See the `o`
@@ -220,8 +288,8 @@ example in §11.
 ## 7. Program structure
 
 A source file contains, in any order: a `params` block, a `metrics` block,
-top-level bindings, `def` macros, `glyph` blocks, and (in sketch files)
-top-level `draw`/`fill` calls.
+`pen` blocks, top-level bindings, `def` macros, `glyph` blocks, and (in
+sketch files) top-level `draw`/`fill` calls.
 
 ### 7.1 params
 
@@ -252,7 +320,16 @@ expressions (they may reference params). Keys `upm`, `x`, `cap`, `asc`,
 `desc` have meaning to the renderer (viewbox, preview guidelines); any other
 key is simply a named number.
 
-### 7.3 Top-level bindings
+### 7.3 pen
+
+```
+pen italic { width = 120; height = 12; angle = 30; }
+```
+
+A named pen (§6.1). Top-level only, like `params` and `metrics`; the name
+is an ordinary immutable binding.
+
+### 7.4 Top-level bindings
 
 ```
 stem = 40 + 0.14 * weight;
@@ -263,7 +340,7 @@ Plain single-assignment bindings. There is no separate `measure` keyword — a
 binding is a binding. Tooling (playground inspector) may display all top-level
 numeric bindings.
 
-### 7.4 def — macros
+### 7.5 def — macros
 
 ```
 def bowl(c, rx, ry) -> (n, w, s, e) {
@@ -286,7 +363,7 @@ def diamond(c, r) -> p {
   `(n, w, s, e) = bowl(center, rx, ry);`.
 - Macros may call macros. No recursion in v0.1.
 
-### 7.5 glyph
+### 7.6 glyph
 
 ```
 glyph o : U+006F {
@@ -315,7 +392,7 @@ glyph o : U+006F {
 - Glyph bodies are ordinary scopes: local bindings, nodes, and macro calls are
   allowed and see all top-level bindings.
 
-### 7.6 Sketch files
+### 7.7 Sketch files
 
 A file with no `glyph` block is a sketch: top-level `draw(path)` renders paths
 as thin spines, `fill(path)` fills closed ones. This keeps the playground
@@ -502,8 +579,13 @@ glyph stem_slab {
 - Point literal `( e , e )` vs parenthesized expression `( e )` are
   distinguished by the comma. Destructuring `( id , id , ... ) =` is a
   statement-level pattern, not an expression.
-- Keyword arguments to `node` (`dir`, `width`, `nib`) are ordered clauses;
-  `dir` and `width` are required, `nib` optional.
+- Keyword arguments to `node` (`dir`, `width`, `nib`, `pen`) are ordered
+  clauses; `dir` is required. The grammar leaves `width`/`nib`/`pen` all
+  optional; the exactly-one-of-`width`-or-`pen` rule (and `nib` only with
+  `width`) is enforced during lowering so partially-typed code still parses.
+- `pen` blocks reuse the `assignment` rule for their fields; the field names
+  (`width`, `height`, `angle`) are validated during lowering, not by the
+  grammar.
 - `U+XXXX` is a token appearing only in glyph headers.
 - The grammar implements Phase 2 syntax (`for`, lists, `import`) from day
   one; the evaluator gates them.
