@@ -66,7 +66,7 @@ Chi is dynamically typed; type errors are reported at evaluation time.
 | path      | `a .. b -- c`                          | Open or closed (ends with `cycle`). |
 | transform | built by postfix operators             | Affine 2×3. Rarely named explicitly. |
 | tuple     | `def` return only                      | Destructured at the call site; not a general value. |
-| list      | `[a, b, c]`                            | Phase 2 (with `for`). |
+| list      | `[a, b, c]`                            | Iterated with `for`. |
 | glyph     | `glyph` block                          | Named; not a first-class expression. |
 | boolean   | comparisons, `and`/`or`/`not`          | Only inside conditional expressions. |
 
@@ -131,12 +131,25 @@ length(p) -> number                 # |p|
 distance(a, b) -> number
 intersection(p, q) -> point         # first intersection of two paths;
                                     # error if none
+point(p, t) -> point                # position on p at segment time t
+direction(p, t) -> number           # tangent angle at t, degrees
+directionpoint(p, d) -> point       # first point whose tangent is d;
+                                    # error if none
 draw(path, ...)                     # sketch mode: render path as a spine
 fill(path, ...)                     # sketch mode: fill a closed path
 ```
 
 `intersection` on two line segments (`a -- b`, `c -- d`) covers the common
 metafont `whatever` idioms (stem meets diagonal, serif meets stem).
+
+The path queries follow the same function-not-operator convention (no
+`point t of p` syntax — `point`, `of` and `direction` stay ordinary
+identifiers). They observe the **fitted** curve, the same geometry that
+renders (§5.2). Time `t` is metapost-style segment time, `0..n` for a path
+of n segments: integer values land exactly on the on-curve points,
+fractional values inside the corresponding segment. `directionpoint`
+matches orientation, not just parallelism — the typical use is finding a
+razor pen's thin crossing on a skeleton guide (§6.1).
 
 ## 5. Paths
 
@@ -261,11 +274,13 @@ degrees of travel (the swing zone is roughly `atan(height / width)` wide).
 The fitter only knows the on-curve points the source writes, so bank
 splines between nodes that merely *bracket* the crossing cut straight
 across at full width instead of pinching. Place a witness node where the
-skeleton's tangent equals the pen angle — its banks are exactly `height`
+skeleton's tangent equals the pen angle — found with `directionpoint`
+(§4.6), so it tracks the design space — its banks are exactly `height`
 apart, and a direction constraint makes the waist tangent to travel:
 
 ```
-node w = (1.5u, 8.5u) dir 45 pen main;      # travel parallel to pen axis
+guide skel = m.pos .. n.pos .. o.pos .. p.pos .. q.pos;
+node w = directionpoint(skel, 45) dir 45 pen main;
 contour ... n.right .. {w.dir} w.right .. o.right ...
         ... o.left .. {w.dir + 180} w.left .. n.left ...
 ```
@@ -430,10 +445,28 @@ in spirit.
   glyph/def body. `params` and `metrics` bind into the file's top level.
 - Evaluation of a file with `--set` bindings: params bound first (defaults
   overridden by the instance), then metrics, then the rest in order.
+- **for** — `for i in a..b { ... }` iterates inclusively on both ends
+  (matching the params range), stepping by 1 from `a` while `<= b`;
+  `for x in list { ... }` iterates any values. Each iteration runs in a
+  fresh scope with the loop variable bound first, so body locals do not
+  carry over or leak; the loop is useful for its side effects
+  (`draw`/`fill`) and statements parameterized by the variable. Loop
+  bounds that vary with params can break §9.3 — same stance as
+  conditionals.
+- **import** — `import "file.chi";` (top level only) evaluates the file's
+  items into the current scope at the import's position: params, metrics,
+  pens, defs, bindings and glyphs land as if written inline. Include-once
+  per canonical file; cycles are errors; nested imports resolve relative
+  to the importing file; errors are prefixed with the imported file's
+  name. File access comes from the host (the CLI), so the playground
+  rejects imports for now.
+- `contour` and `guide` names are also ordinary path bindings: later code
+  can reference and query them (`directionpoint(skel, 45)`).
 - Paths store points and constraints; **curve fitting runs at render time**
   per contour/draw call, via `curve_fitter` (two-parameter spline: G2-smooth
   interior, honoring per-point direction constraints and corner types,
-  closed when `cycle`).
+  closed when `cycle`). The path queries (§4.6) run the same fitter at
+  evaluation time, so queried and rendered geometry always agree.
 
 ## 9. Rendering (SVG target)
 
@@ -470,13 +503,13 @@ grammar implements the *full* syntax including Phase 2 constructs, so example
 files and highlighting are stable; the evaluator rejects unimplemented
 constructs with a clear "not yet implemented" error.
 
-**Phase 2:**
-- `for name in list { ... }` and `for i in a..b { ... }`; list literals
-  `[a, b, c]`. For repeated components (CJK/Indic motifs, striped decorations).
-- `import "file.chi";` — evaluate another file into the current scope
-  (measures/macros shared across a family; true-italic sources sharing
-  measures with the upright).
-- Path operations: `subpath`, `point t of p`, arc-length queries.
+**Implemented since:** `for` and list literals, `import` (§8), and the
+path queries `point` / `direction` / `directionpoint` (§4.6 — as builtins,
+not the `point t of p` operator syntax once sketched here).
+
+**Phase 2 (remaining):**
+- Path operations: `subpath`, arc-length queries.
+- Import support in the playground (a virtual file loader).
 - UFO + designspace emission and adaptive master sampling (integration with
   the existing SVG→UFO pipeline).
 
