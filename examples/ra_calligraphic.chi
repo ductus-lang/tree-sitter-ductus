@@ -7,10 +7,16 @@ metrics{
   u=100;
 }
 
+params {
+  # Both thin crossings must exist on the skeleton: the second needs
+  # tangent pen_angle + 180 within the p..q leg's 270..215 sweep.
+  pen_angle = 45 in 40..65;
+}
+
 pen main {
   width  = 150;
   height = 10;
-  angle  = 45;
+  angle  = pen_angle;
 }
 
 glyph va: U+006F {
@@ -23,9 +29,10 @@ glyph va: U+006F {
 
   guide skel = m.pos .. n.pos .. o.pos .. p.pos .. q.pos;
 
-  # Thin-crossing witness nodes: banks are exactly `height` apart there.
-  node w1 = directionpoint(skel, 45) dir 45 pen main;
-  node w2 = directionpoint(skel, 225) dir 225 pen main;
+  # Thin-crossing witness nodes: banks are exactly `height` apart there,
+  # and the query keeps them on the crossing as pen_angle moves.
+  node w1 = directionpoint(skel, pen_angle) dir pen_angle pen main;
+  node w2 = directionpoint(skel, pen_angle + 180) dir pen_angle + 180 pen main;
 
   contour c1 =  m.right .. n.right .. {w1.dir} w1.right .. o.right
    .. p.right .. {w2.dir} w2.right .. q.right
