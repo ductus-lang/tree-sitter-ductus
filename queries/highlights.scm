@@ -36,6 +36,7 @@
   "dir"
   "width"
   "nib"
+  "pen"
 ] @attribute
 
 (cycle) @constant.builtin
@@ -92,6 +93,7 @@
 (def_declaration name: (identifier) @function)
 (param_declaration name: (identifier) @variable.parameter)
 (node_declaration name: (identifier) @variable)
+(pen_block name: (identifier) @type)
 (contour_declaration name: (identifier) @property)
 (guide_declaration name: (identifier) @property)
 (anchor_declaration name: (identifier) @property)
