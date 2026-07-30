@@ -427,8 +427,23 @@ hair = contrast * stem;
 ```
 
 Plain single-assignment bindings. There is no separate `measure` keyword — a
-binding is a binding. Tooling (playground inspector) may display all top-level
-numeric bindings.
+binding is a binding.
+
+Numeric bindings are reported to tooling, which displays them: top-level ones
+in source order, and a glyph body's own alongside its advance. This is the only
+way to read a computed value back out of a source file, so it is also how chi
+measures itself — a binding over a contour is a probe:
+
+```
+glyph o {
+  ...
+  contour main = circle(center, r);
+  bulge = distance(point(main, 0.2), center) - r;   # 0.027 % of r
+}
+```
+
+`chi inspect file.chi [--set …] [--glyph name]` prints them; so does the
+playground's inspector.
 
 ### 7.5 def — macros
 
@@ -540,7 +555,9 @@ in spirit.
 
 The playground (separate repo, `chi-playground`) re-renders on edit using the
 tree-sitter incremental parse; sliders come from the `params` block; the
-inspector lists top-level bindings and per-glyph contours/guides/anchors.
+inspector lists metrics, top-level bindings and each glyph's numbers, and
+follows the slider as it moves. Per-glyph contours, guides and anchors are
+listed by `chi inspect`.
 
 ### 9.3 Interpolation-compatibility rule
 
