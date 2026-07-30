@@ -142,12 +142,15 @@ fill(path, ...)                     # sketch mode: fill a closed path
 ```
 
 `intersection` on two line segments (`a -- b`, `c -- d`) covers the common
-metafont `whatever` idioms (stem meets diagonal, serif meets stem).
+metafont `whatever` idioms (stem meets diagonal, serif meets stem), and is
+exact there. "First" is the least position along `p`: its segments in path
+order, then the least parameter within a segment.
 
 The path queries follow the same function-not-operator convention (no
 `point t of p` syntax — `point`, `of` and `direction` stay ordinary
 identifiers). They observe the **fitted** curve, the same geometry that
-renders (§5.2). Time `t` is metapost-style segment time, `0..n` for a path
+renders (§5.2) — `intersection` included, so a curved path is cut where it
+is drawn, not along the chords between its on-curve points. Time `t` is metapost-style segment time, `0..n` for a path
 of n segments: integer values land exactly on the on-curve points,
 fractional values inside the corresponding segment. `directionpoint`
 matches orientation, not just parallelism — the typical use is finding a
