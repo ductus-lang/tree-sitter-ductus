@@ -141,6 +141,45 @@ draw(path, ...)                     # sketch mode: render path as a spine
 fill(path, ...)                     # sketch mode: fill a closed path
 ```
 
+### 4.7 Shape constructors
+
+Closed paths for the shapes that would otherwise be written out point by
+point:
+
+```
+circle(c, r) -> path                     # 4 points
+ellipse(c, rx, ry) -> path               # 8 points
+roundrect(p, q, r) -> path               # 8 points: 4 lines, 4 arcs
+superellipse(c, rx, ry, n, count) -> path    # `count` points
+```
+
+They return ordinary path values — the on-curve points and their tangents,
+with the handles still left to the fitter (§1). So they transform, they can
+be queried, and the designer can always write the same outline by hand
+instead.
+
+- **Counterclockwise**, so the result is directly usable as an outer
+  contour; a counter is `circle(...) reversed` (§6).
+- **The point count never depends on a value**, only on which constructor
+  was called, so a shape keeps its topology across the design space (§9.3).
+  This is why `ellipse(c, r, r)` is not `circle(c, r)`: branching on
+  `rx == ry` would change the point count as an axis crossed 1.0. Four
+  points describe a circle to 0.027 % of `r` — the fitter is exact there —
+  but only describe an ellipse to about 1 %, so `ellipse` spends eight and
+  reaches 0.06 %.
+- `roundrect` takes two opposite corners in any order. Its radius is
+  clamped to half the shorter side, above which neighbouring arcs would
+  overlap. At zero it is a rectangle carrying four zero-length segments,
+  rather than a four-point path — the point count is fixed. Note that a
+  zero-length segment has no tangent, so the path queries of §4.6 cannot
+  see it.
+- `superellipse` draws `|x/rx|^n + |y/ry|^n = 1`; `n = 2` is the ellipse and
+  larger `n` squares it off. `n` must be at least 2, and `count` a multiple
+  of 4 so that a point lands on each axis extreme. Sampling, not fitting,
+  limits the result: sixteen points hold `n = 4` to 0.15 % of the side, but
+  only reach 0.69 % at `n = 10`. `count` cannot vary with a param without
+  breaking §9.3 — the same stance as `for` bounds in §8.
+
 `intersection` on two line segments (`a -- b`, `c -- d`) covers the common
 metafont `whatever` idioms (stem meets diagonal, serif meets stem), and is
 exact there. "First" is the least position along `p`: its segments in path
@@ -200,6 +239,16 @@ and outgoing direction constraints (optional), and a point type
 (smooth/corner/line-adjacent). Fitting to cubic Béziers happens when the path
 is rendered (`contour`, `draw`, `fill`), not when it is bound — so paths can
 be transformed losslessly.
+
+Losslessly, but note what that does and does not promise. A transform maps the
+points and their constraints; the fit then runs on the result. It does **not**
+map the fitted curve, and the fitter's handle rule is not affine-equivariant,
+so the two are not the same thing. Concretely: the fitter reproduces a
+four-point circle exactly, to 0.027 % of `r`, but the same four points squashed
+by `yscaled` fit to a curve about 1 % of `rx` outside a true ellipse, because
+the vertical handle comes out some 15 % too long. Circles are a fixed point of
+the rule; conics in general are not. Where accuracy matters, spend points — or
+use the constructors of §4.7, which do.
 
 ## 6. Nodes and derived points
 
@@ -508,9 +557,10 @@ grammar implements the *full* syntax including Phase 2 constructs, so example
 files and highlighting are stable; the evaluator rejects unimplemented
 constructs with a clear "not yet implemented" error.
 
-**Implemented since:** `for` and list literals, `import` (§8), and the
+**Implemented since:** `for` and list literals, `import` (§8), the
 path queries `point` / `direction` / `directionpoint` (§4.6 — as builtins,
-not the `point t of p` operator syntax once sketched here).
+not the `point t of p` operator syntax once sketched here), and the shape
+constructors (§4.7).
 
 **Phase 2 (remaining):**
 - Path operations: `subpath`, arc-length queries.
