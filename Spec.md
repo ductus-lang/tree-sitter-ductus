@@ -242,13 +242,33 @@ be transformed losslessly.
 
 Losslessly, but note what that does and does not promise. A transform maps the
 points and their constraints; the fit then runs on the result. It does **not**
-map the fitted curve, and the fitter's handle rule is not affine-equivariant,
-so the two are not the same thing. Concretely: the fitter reproduces a
-four-point circle exactly, to 0.027 % of `r`, but the same four points squashed
-by `yscaled` fit to a curve about 1 % of `rx` outside a true ellipse, because
-the vertical handle comes out some 15 % too long. Circles are a fixed point of
-the rule; conics in general are not. Where accuracy matters, spend points — or
-use the constructors of §4.7, which do.
+map the fitted curve — the handle rule is not affine-equivariant, and cannot be.
+
+The reason is a counting argument. A segment presents the rule with two
+endpoints and two tangent directions: six degrees of freedom, which is also the
+dimension of the affine group. The group therefore acts transitively on such
+configurations — `diag(4.46, 1.85)` carries a 45° circular arc onto a 90° one,
+endpoints and both tangents together — so an equivariant rule cannot tell them
+apart. It would be forced to write the handle lengths as `k·a` and `k·b`, for a
+chord decomposed as `a·t_P + b·t_Q`, with one universal `k` that is exact at a
+single arc angle.
+
+What chi uses instead is Hobby's velocity, whose `rho(th, th) = 2/(1 + cos th)`
+is the exact circular-arc velocity at *every* angle. That is what makes a circle
+exact at any sampling density, and it is worth more than equivariance:
+
+| points per circle | Hobby's velocity | an equivariant rule |
+|-------------------|------------------|---------------------|
+| 4 (90° arcs)      | 0.027 % of `r`   | 0.027 %             |
+| 8 (45°)           | 0.0004 %         | 1.05 %              |
+| 16 (22.5°)        | under 0.0001 %   | 0.31 %              |
+
+The price is that a circle scaled unevenly is not a good ellipse, and the error
+grows with the squash: 0.03 % of `rx` at a 1:1 aspect, 1.0 % at 0.72, 3.8 % at
+0.5, 17 % at 0.1. So build an ellipse with `ellipse`, not by scaling a circle.
+For a very flat one, spend points as well — at a 1:5 aspect,
+`superellipse(c, rx, ry, 2, count)` goes from 3.9 % at eight points to 0.6 % at
+sixteen and 0.05 % at thirty-two.
 
 ## 6. Nodes and derived points
 
