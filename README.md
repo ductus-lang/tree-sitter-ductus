@@ -20,6 +20,19 @@ The grammar implements the full v0.1 surface, including constructs the
 evaluator does not yet handle (`for`, lists, `import`). This keeps example
 files and highlighting stable while the language back end catches up.
 
+## NVIM
+
+vim-treesitter's `main` branch cannot install grammars outside its registry,
+so the chi parser must be compiled by hand and dropped on the runtimepath
+under parser/. tree-sitter-chi:
+
+```
+cc -o ~/.config/nvim/parser/chi.so -shared -fPIC -Os -I src src/parser.c
+```
+
+Core treesitter then loads parser/wikitext.so for the `wikitext` language.
+`vim.treesitter.language.register("chi", { "chi" })`
+
 ## License
 
 MIT
