@@ -123,7 +123,9 @@ counter) are the intended use.
 ### 4.6 Built-in functions
 
 ```
-min(a, b)  max(a, b)  abs(a)  sqrt(a)  floor(a)  ceil(a)  round(a)
+min(a, b)  max(a, b)  clamp(x, lo, hi)   # clamp errors when lo > hi
+abs(a)  sign(a)                     # sign(0) = 0
+sqrt(a)  floor(a)  ceil(a)  round(a)
 sin(a)  cos(a)  tan(a)              # degrees
 angle((x, y)) -> number             # atan2 in degrees
 unitvec(theta) -> point             # (cos theta, sin theta)
