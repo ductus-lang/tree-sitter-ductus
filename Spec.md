@@ -137,6 +137,8 @@ point(p, t) -> point                # position on p at segment time t
 direction(p, t) -> number           # tangent angle at t, degrees
 directionpoint(p, d) -> point       # first point whose tangent is d;
                                     # error if none
+directionpoint(p, d, i) -> point    # the i-th such point, 0-based;
+                                    # error if fewer than i + 1 exist
 draw(path, ...)                     # sketch mode: render path as a spine
 fill(path, ...)                     # sketch mode: fill a closed path
 ```
@@ -193,7 +195,10 @@ is drawn, not along the chords between its on-curve points. Time `t` is metapost
 of n segments: integer values land exactly on the on-curve points,
 fractional values inside the corresponding segment. `directionpoint`
 matches orientation, not just parallelism — the typical use is finding a
-razor pen's thin crossing on a skeleton guide (§6.1).
+razor pen's thin crossing on a skeleton guide (§6.1). Its optional index
+counts matches in position order from 0, so `directionpoint(p, d, 0)` is
+`directionpoint(p, d)`; a match landing exactly on a joint, or on a
+closed path's start point, counts once.
 
 ## 5. Paths
 
