@@ -28,5 +28,17 @@ fn main() {
         println!("cargo:rerun-if-changed={}", scanner_path.to_str().unwrap());
     }
 
+    // lib.rs gates the query constants (HIGHLIGHTS_QUERY, ...) behind these
+    // cfgs; emit one for each query file that exists.
+    let queries_dir = std::path::Path::new("queries");
+    for query in ["highlights", "injections", "locals", "tags"] {
+        println!("cargo:rustc-check-cfg=cfg(with_{query}_query)");
+        let path = queries_dir.join(format!("{query}.scm"));
+        if path.exists() {
+            println!("cargo:rustc-cfg=with_{query}_query");
+            println!("cargo:rerun-if-changed={}", path.to_str().unwrap());
+        }
+    }
+
     c_config.compile("tree-sitter-ductus");
 }
