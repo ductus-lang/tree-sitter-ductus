@@ -1,4 +1,4 @@
-; Chi syntax highlighting
+; Ductus syntax highlighting
 
 ; Comments
 (comment) @comment

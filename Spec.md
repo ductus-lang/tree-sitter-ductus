@@ -1,8 +1,8 @@
-# Chi Language Specification
+# Ductus Language Specification
 
 Version 0.1 (draft) — 2026-07-18
 
-Chi is a domain-specific language for parametric type design. A chi source file
+Ductus is a domain-specific language for parametric type design. A ductus source file
 describes glyph outlines as explicit contours whose points are expressions over
 named design parameters (weight, contrast, width, …). Curve handles are never
 written by hand: the designer gives on-curve points, directions, and point
@@ -50,12 +50,12 @@ one path expression).
   yscaled rotated slanted reversed metrics draw fill`
 - **Direction constants:** `right = 0`, `up = 90`, `left = 180`, `down = 270`.
   These are ordinary numeric bindings in the prelude, not syntax. All angles in
-  chi are **degrees, counterclockwise, 0° = +x**. The coordinate system is
+  ductus are **degrees, counterclockwise, 0° = +x**. The coordinate system is
   Cartesian, y-up, origin at the glyph's left-sidebearing/baseline point.
 
 ## 3. Values and types
 
-Chi is dynamically typed; type errors are reported at evaluation time.
+Ductus is dynamically typed; type errors are reported at evaluation time.
 
 | Type      | Literal / constructor                  | Notes |
 |-----------|----------------------------------------|-------|
@@ -86,7 +86,7 @@ Point arithmetic: `point ± point`, `number * point`, `point * number`,
 `t[a, b]` = `a + t*(b - a)`, for numbers and points. `0.5[a, b]` is the
 midpoint. `t` may be any numeric expression: `(w/(w+v))[a, b]`.
 
-(Grammar note: chi has no indexing, so postfix `[` unambiguously means
+(Grammar note: ductus has no indexing, so postfix `[` unambiguously means
 mediation.)
 
 ### 4.3 Field access
@@ -258,7 +258,7 @@ apart. It would be forced to write the handle lengths as `k·a` and `k·b`, for 
 chord decomposed as `a·t_P + b·t_Q`, with one universal `k` that is exact at a
 single arc angle.
 
-What chi uses instead is Hobby's velocity, whose `rho(th, th) = 2/(1 + cos th)`
+What ductus uses instead is Hobby's velocity, whose `rho(th, th) = 2/(1 + cos th)`
 is the exact circular-arc velocity at *every* angle. That is what makes a circle
 exact at any sampling density, and it is worth more than equivariance:
 
@@ -456,7 +456,7 @@ binding is a binding.
 
 Numeric bindings are reported to tooling, which displays them: top-level ones
 in source order, and a glyph body's own alongside its advance. This is the only
-way to read a computed value back out of a source file, so it is also how chi
+way to read a computed value back out of a source file, so it is also how ductus
 measures itself — a binding over a contour is a probe:
 
 ```
@@ -467,7 +467,7 @@ glyph o {
 }
 ```
 
-`chi inspect file.chi [--set …] [--glyph name]` prints them; so does the
+`ductus inspect file.ductus [--set …] [--glyph name]` prints them; so does the
 playground's inspector.
 
 ### 7.5 def — macros
@@ -526,7 +526,7 @@ glyph o : U+006F {
 
 A file with no `glyph` block is a sketch: top-level `draw(path)` renders paths
 as thin spines, `fill(path)` fills closed ones. This keeps the playground
-useful for freehand exploration and keeps today's simple `.chi` samples valid
+useful for freehand exploration and keeps today's simple `.ductus` samples valid
 in spirit.
 
 ## 8. Evaluation semantics
@@ -547,7 +547,7 @@ in spirit.
   (`draw`/`fill`) and statements parameterized by the variable. Loop
   bounds that vary with params can break §9.3 — same stance as
   conditionals.
-- **import** — `import "file.chi";` (top level only) evaluates the file's
+- **import** — `import "file.ductus";` (top level only) evaluates the file's
   items into the current scope at the import's position: params, metrics,
   pens, defs, bindings and glyphs land as if written inline. Include-once
   per canonical file; cycles are errors; nested imports resolve relative
@@ -566,7 +566,7 @@ in spirit.
 
 ### 9.1 Output
 
-`chi build file.chi [--glyph name] [--set param=value ...] [--debug] -o out.svg`
+`ductus build file.ductus [--glyph name] [--set param=value ...] [--debug] -o out.svg`
 
 - One SVG per glyph (or a sheet of all glyphs). Filled black-on-transparent,
   `fill-rule: nonzero`. The SVG viewBox is derived from `upm`, `asc`, `desc`;
@@ -578,11 +578,11 @@ in spirit.
 
 ### 9.2 Playground contract
 
-The playground (separate repo, `chi-playground`) re-renders on edit using the
+The playground (separate repo, `ductus-playground`) re-renders on edit using the
 tree-sitter incremental parse; sliders come from the `params` block; the
 inspector lists metrics, top-level bindings and each glyph's numbers, and
 follows the slider as it moves. Per-glyph contours, guides and anchors are
-listed by `chi inspect`.
+listed by `ductus inspect`.
 
 ### 9.3 Interpolation-compatibility rule
 
@@ -712,7 +712,7 @@ glyph stem_slab {
 }
 ```
 
-## 12. Grammar notes (for tree-sitter-chi)
+## 12. Grammar notes (for tree-sitter-ductus)
 
 - `extras`: whitespace including newlines, and comments. Statements end at
   `;` — no newline-sensitivity anywhere.

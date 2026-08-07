@@ -1,8 +1,9 @@
 {
-  "name": "tree-sitter-chi",
+  "name": "tree-sitter-ductus",
   "version": "0.1.0",
-  "description": "Chi graphical programming language",
-  "repository": "https://gitlab.com/chil-lang/tree-sitter-chi",
+  "description": "Ductus graphical programming language",
+  "type": "module",
+  "repository": "https://github.com/ductus-lang/tree-sitter-ductus",
   "license": "MIT",
   "author": {
     "name": "Santhosh Thotingal",
@@ -15,7 +16,7 @@
     "incremental",
     "parsing",
     "tree-sitter",
-    "chi"
+    "ductus"
   ],
   "files": [
     "grammar.js",

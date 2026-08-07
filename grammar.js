@@ -1,5 +1,5 @@
 /**
- * @file Chi — a DSL for parametric type design
+ * @file Ductus — a DSL for parametric type design
  * @author Santhosh Thottingal <santhosh.thottingal@gmail.com>
  * @license MIT
  */
@@ -20,8 +20,8 @@ const PREC = {
   POSTFIX: 10,
 };
 
-module.exports = grammar({
-  name: "chi",
+export default grammar({
+  name: "ductus",
 
   extras: ($) => [/\s/, $.comment],
 

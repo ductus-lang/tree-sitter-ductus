@@ -1,7 +1,7 @@
-# tree-sitter-chi
+# tree-sitter-ductus
 
-A [tree-sitter](https://tree-sitter.github.io/) grammar for **Chi**, a language
-for parametric type design. Chi describes glyph outlines as explicit contours
+A [tree-sitter](https://tree-sitter.github.io/) grammar for **Ductus**, a language
+for parametric type design. Ductus describes glyph outlines as explicit contours
 whose points are expressions over named design parameters (weight, contrast,
 width, …); a spline solver places the curve handles.
 
@@ -13,7 +13,7 @@ live in [`examples/`](./examples).
 ```sh
 tree-sitter generate      # regenerate the parser from grammar.js
 tree-sitter test          # run the corpus tests in test/corpus
-tree-sitter parse examples/o.chi
+tree-sitter parse examples/o.ductus
 ```
 
 The grammar implements the full v0.1 surface, including constructs the
@@ -23,15 +23,15 @@ files and highlighting stable while the language back end catches up.
 ## NVIM
 
 vim-treesitter's `main` branch cannot install grammars outside its registry,
-so the chi parser must be compiled by hand and dropped on the runtimepath
-under parser/. tree-sitter-chi:
+so the ductus parser must be compiled by hand and dropped on the runtimepath
+under parser/. tree-sitter-ductus:
 
 ```
-cc -o ~/.config/nvim/parser/chi.so -shared -fPIC -Os -I src src/parser.c
+cc -o ~/.config/nvim/parser/ductus.so -shared -fPIC -Os -I src src/parser.c
 ```
 
 Core treesitter then loads parser/wikitext.so for the `wikitext` language.
-`vim.treesitter.language.register("chi", { "chi" })`
+`vim.treesitter.language.register("ductus", { "ductus" })`
 
 ## License
 

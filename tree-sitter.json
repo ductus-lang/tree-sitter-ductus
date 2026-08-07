@@ -2,21 +2,21 @@
   "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/config.schema.json",
   "grammars": [
     {
-      "name": "chi",
-      "camelcase": "Chi",
-      "title": "Chi",
-      "scope": "source.chi",
+      "name": "ductus",
+      "camelcase": "Ductus",
+      "title": "Ductus",
+      "scope": "source.ductus",
       "file-types": [
-        "chi"
+        "ductus"
       ],
-      "injection-regex": "^chi$",
-      "class-name": "TreeSitterChi"
+      "injection-regex": "^ductus$",
+      "class-name": "TreeSitterDuctus"
     }
   ],
   "metadata": {
     "version": "0.1.0",
     "license": "MIT",
-    "description": "Chi graphical programming language",
+    "description": "Ductus graphical programming language",
     "authors": [
       {
         "name": "Santhosh Thotingal",
@@ -25,12 +25,13 @@
       }
     ],
     "links": {
-      "repository": "https://gitlab.com/chil-lang/tree-sitter-chi"
+      "repository": "https://github.com/ductus-lang/tree-sitter-ductus"
     }
   },
   "bindings": {
     "c": true,
     "go": true,
+    "java": false,
     "node": true,
     "python": true,
     "rust": true,

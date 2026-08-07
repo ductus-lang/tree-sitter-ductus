@@ -1,13 +1,13 @@
 [package]
-name = "tree-sitter-chi"
-description = "Chi graphical programming language"
+name = "tree-sitter-ductus"
+description = "Ductus graphical programming language"
 version = "0.1.0"
 authors = ["Santhosh Thotingal <santhosh.thottingal@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-keywords = ["incremental", "parsing", "tree-sitter", "chi"]
+keywords = ["incremental", "parsing", "tree-sitter", "ductus"]
 categories = ["parser-implementations", "parsing", "text-editors"]
-repository = "https://gitlab.com/chil-lang/tree-sitter-chi"
+repository = "https://github.com/ductus-lang/tree-sitter-ductus"
 edition = "2021"
 autoexamples = false
 

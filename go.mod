@@ -1,4 +1,4 @@
-module gitlab.com/chil-lang/tree-sitter-chi
+module github.com/ductus-lang/tree-sitter-ductus
 
 go 1.22
 
