@@ -88,6 +88,16 @@
   "."
 ] @punctuation.delimiter
 
+; Identifier captures, ordered general to specific: in nvim, when two
+; patterns capture the same node, the later pattern wins.
+
+; Plain identifiers
+(identifier) @variable
+
+; Member properties (.x, .left, .right, .pos, ...)
+(member_expression
+  property: (identifier) @property)
+
 ; Definition names
 (glyph_block name: (identifier) @type)
 (def_declaration name: (identifier) @function)
@@ -103,9 +113,13 @@
 (call_expression
   function: (identifier) @function.call)
 
-; Member properties (.x, .left, .right, .pos, ...)
-(member_expression
-  property: (identifier) @property)
-
-; Plain identifiers
-(identifier) @variable
+; Built-in functions (Spec §4.6) and shape constructors (§4.7).
+; Only in call position: `point`, `angle`, `length` stay ordinary
+; identifiers elsewhere.
+(call_expression
+  function: (identifier) @function.builtin
+  (#any-of? @function.builtin
+    "min" "max" "clamp" "abs" "sign" "sqrt" "floor" "ceil" "round"
+    "sin" "cos" "tan" "angle" "unitvec" "length" "distance"
+    "intersection" "point" "direction" "directionpoint" "draw" "fill"
+    "circle" "ellipse" "roundrect" "superellipse"))
