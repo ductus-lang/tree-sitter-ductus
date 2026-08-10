@@ -24,13 +24,13 @@ files and highlighting stable while the language back end catches up.
 
 vim-treesitter's `main` branch cannot install grammars outside its registry,
 so the ductus parser must be compiled by hand and dropped on the runtimepath
-under parser/. tree-sitter-ductus:
+under parser/:
 
 ```
 cc -o ~/.config/nvim/parser/ductus.so -shared -fPIC -Os -I src src/parser.c
 ```
 
-Core treesitter then loads parser/wikitext.so for the `wikitext` language.
+Core treesitter then loads parser/ductus.so for the `ductus` language.
 `vim.treesitter.language.register("ductus", { "ductus" })`
 
 ## License
