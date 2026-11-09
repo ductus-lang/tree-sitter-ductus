@@ -114,8 +114,8 @@ Def with tuple return
 ================================================================================
 
 def bowl(c, rx, ry) -> (n, w, s, e) {
-  node n = c + (0, ry) dir left width hair;
-  node e = c + (rx, 0) dir up width stem;
+  node n = c + (0, ry) dir left pen pen(hair);
+  node e = c + (rx, 0) dir up pen pen(stem);
 }
 
 --------------------------------------------------------------------------------
@@ -142,8 +142,11 @@ def bowl(c, rx, ry) -> (n, w, s, e) {
             y: (identifier)))
         dir: (dir_clause
           (identifier))
-        width: (width_clause
-          (identifier)))
+        pen: (pen_clause
+          (call_expression
+            function: (identifier)
+            arguments: (arguments
+              (identifier)))))
       (node_declaration
         name: (identifier)
         position: (binary_expression
@@ -153,8 +156,11 @@ def bowl(c, rx, ry) -> (n, w, s, e) {
             y: (number)))
         dir: (dir_clause
           (identifier))
-        width: (width_clause
-          (identifier))))))
+        pen: (pen_clause
+          (call_expression
+            function: (identifier)
+            arguments: (arguments
+              (identifier))))))))
 
 ================================================================================
 Glyph block

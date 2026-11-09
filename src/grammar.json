@@ -23,10 +23,6 @@
         },
         {
           "type": "SYMBOL",
-          "name": "pen_block"
-        },
-        {
-          "type": "SYMBOL",
           "name": "def_declaration"
         },
         {
@@ -199,38 +195,6 @@
           "members": [
             {
               "type": "FIELD",
-              "name": "width",
-              "content": {
-                "type": "SYMBOL",
-                "name": "width_clause"
-              }
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
-        },
-        {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "FIELD",
-              "name": "nib",
-              "content": {
-                "type": "SYMBOL",
-                "name": "nib_clause"
-              }
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
-        },
-        {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "FIELD",
               "name": "pen",
               "content": {
                 "type": "SYMBOL",
@@ -254,32 +218,6 @@
         {
           "type": "STRING",
           "value": "dir"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "_expression"
-        }
-      ]
-    },
-    "width_clause": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "width"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "_expression"
-        }
-      ]
-    },
-    "nib_clause": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "nib"
         },
         {
           "type": "SYMBOL",
@@ -500,38 +438,6 @@
         {
           "type": "STRING",
           "value": "metrics"
-        },
-        {
-          "type": "STRING",
-          "value": "{"
-        },
-        {
-          "type": "REPEAT",
-          "content": {
-            "type": "SYMBOL",
-            "name": "assignment"
-          }
-        },
-        {
-          "type": "STRING",
-          "value": "}"
-        }
-      ]
-    },
-    "pen_block": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "pen"
-        },
-        {
-          "type": "FIELD",
-          "name": "name",
-          "content": {
-            "type": "SYMBOL",
-            "name": "identifier"
-          }
         },
         {
           "type": "STRING",

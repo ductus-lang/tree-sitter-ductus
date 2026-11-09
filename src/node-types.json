@@ -1548,65 +1548,6 @@
     }
   },
   {
-    "type": "nib_clause",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "binary_expression",
-          "named": true
-        },
-        {
-          "type": "call_expression",
-          "named": true
-        },
-        {
-          "type": "conditional_expression",
-          "named": true
-        },
-        {
-          "type": "identifier",
-          "named": true
-        },
-        {
-          "type": "implicit_multiplication",
-          "named": true
-        },
-        {
-          "type": "mediation",
-          "named": true
-        },
-        {
-          "type": "member_expression",
-          "named": true
-        },
-        {
-          "type": "number",
-          "named": true
-        },
-        {
-          "type": "parenthesized_expression",
-          "named": true
-        },
-        {
-          "type": "point",
-          "named": true
-        },
-        {
-          "type": "transform_expression",
-          "named": true
-        },
-        {
-          "type": "unary_expression",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "node_declaration",
     "named": true,
     "fields": {
@@ -1626,16 +1567,6 @@
         "types": [
           {
             "type": "identifier",
-            "named": true
-          }
-        ]
-      },
-      "nib": {
-        "multiple": false,
-        "required": false,
-        "types": [
-          {
-            "type": "nib_clause",
             "named": true
           }
         ]
@@ -1700,16 +1631,6 @@
           },
           {
             "type": "unary_expression",
-            "named": true
-          }
-        ]
-      },
-      "width": {
-        "multiple": false,
-        "required": false,
-        "types": [
-          {
-            "type": "width_clause",
             "named": true
           }
         ]
@@ -1990,32 +1911,6 @@
           }
         ]
       }
-    }
-  },
-  {
-    "type": "pen_block",
-    "named": true,
-    "fields": {
-      "name": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "identifier",
-            "named": true
-          }
-        ]
-      }
-    },
-    "children": {
-      "multiple": true,
-      "required": false,
-      "types": [
-        {
-          "type": "assignment",
-          "named": true
-        }
-      ]
     }
   },
   {
@@ -2368,10 +2263,6 @@
         {
           "type": "params_block",
           "named": true
-        },
-        {
-          "type": "pen_block",
-          "named": true
         }
       ]
     }
@@ -2614,65 +2505,6 @@
     }
   },
   {
-    "type": "width_clause",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "binary_expression",
-          "named": true
-        },
-        {
-          "type": "call_expression",
-          "named": true
-        },
-        {
-          "type": "conditional_expression",
-          "named": true
-        },
-        {
-          "type": "identifier",
-          "named": true
-        },
-        {
-          "type": "implicit_multiplication",
-          "named": true
-        },
-        {
-          "type": "mediation",
-          "named": true
-        },
-        {
-          "type": "member_expression",
-          "named": true
-        },
-        {
-          "type": "number",
-          "named": true
-        },
-        {
-          "type": "parenthesized_expression",
-          "named": true
-        },
-        {
-          "type": "point",
-          "named": true
-        },
-        {
-          "type": "transform_expression",
-          "named": true
-        },
-        {
-          "type": "unary_expression",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "!=",
     "named": false
   },
@@ -2834,10 +2666,6 @@
     "named": false
   },
   {
-    "type": "nib",
-    "named": false
-  },
-  {
     "type": "node",
     "named": false
   },
@@ -2888,10 +2716,6 @@
   {
     "type": "unicode",
     "named": true
-  },
-  {
-    "type": "width",
-    "named": false
   },
   {
     "type": "xscaled",

@@ -31,11 +31,9 @@
   "anchor"
 ] @keyword.storage
 
-; Node / path keyword clauses
+; Node keyword clauses
 [
   "dir"
-  "width"
-  "nib"
   "pen"
 ] @attribute
 
@@ -103,7 +101,6 @@
 (def_declaration name: (identifier) @function)
 (param_declaration name: (identifier) @variable.parameter)
 (node_declaration name: (identifier) @variable)
-(pen_block name: (identifier) @type)
 (contour_declaration name: (identifier) @property)
 (guide_declaration name: (identifier) @property)
 (anchor_declaration name: (identifier) @property)
@@ -122,4 +119,4 @@
     "min" "max" "clamp" "abs" "sign" "sqrt" "floor" "ceil" "round"
     "sin" "cos" "tan" "angle" "unitvec" "length" "distance"
     "intersection" "point" "direction" "directionpoint" "draw" "fill"
-    "circle" "ellipse" "roundrect" "superellipse"))
+    "pen" "circle" "ellipse" "roundrect" "superellipse"))

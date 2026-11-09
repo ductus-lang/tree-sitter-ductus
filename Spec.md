@@ -14,7 +14,7 @@ control points.
 1. **Outline-first.** The filled contour is the primary artifact. There is no
    stroke expansion in the core language.
 2. **Skeleton as scaffolding, not geometry.** Skeleton *nodes* carry direction
-   and width and expose exactly-computed edge points (`n.left`, `n.right`).
+   and a pen and expose exactly-computed edge points (`n.left`, `n.right`).
    Outlines are written *through* these derived points. Curves are never
    offset; only points are.
 3. **Interpolation compatibility by construction.** The number and type of
@@ -45,8 +45,8 @@ one path expression).
   imports. No escapes needed in v0.1.
 - **Unicode literals:** `U+0D15` (`U+` followed by hex digits). Only in glyph
   headers.
-- **Keywords:** `params in glyph contour guide anchor node dir width nib
-  pen cycle corner def for if else and or not import shifted scaled xscaled
+- **Keywords:** `params in glyph contour guide anchor node dir pen cycle
+  corner def for if else and or not import shifted scaled xscaled
   yscaled rotated slanted reversed metrics draw fill`
 - **Direction constants:** `right = 0`, `up = 90`, `left = 180`, `down = 270`.
   These are ordinary numeric bindings in the prelude, not syntax. All angles in
@@ -61,8 +61,8 @@ Ductus is dynamically typed; type errors are reported at evaluation time.
 |-----------|----------------------------------------|-------|
 | number    | `12`, `0.5`                            | Also used for angles (degrees). |
 | point     | `(x, y)`                               | Doubles as a 2-D vector. |
-| node      | `node` statement                       | Position + direction + width (+ nib), or + pen. |
-| pen       | `pen` block                            | Ellipse: width, height, angle (§6.1). |
+| node      | `node` statement                       | Position + direction + pen. |
+| pen       | `pen(width, height, angle)`            | Ellipse (§6.1). |
 | path      | `a .. b -- c`                          | Open or closed (ends with `cycle`). |
 | transform | built by postfix operators             | Affine 2×3. Rarely named explicitly. |
 | tuple     | `def` return only                      | Destructured at the call site; not a general value. |
@@ -99,7 +99,7 @@ mediation.)
 
 ```
 p shifted (dx, dy)
-p scaled k          # uniform; on nodes also scales width
+p scaled k          # uniform; on nodes also scales the pen
 p xscaled k
 p yscaled k
 p rotated theta     # degrees, about origin
@@ -109,7 +109,7 @@ p reversed          # paths only: reverse direction
 
 They apply to points, nodes, and paths, and chain left-to-right:
 `p rotated 10 shifted (50, 0)`. Transforming a node transforms its position
-*and* its direction/nib angles (width is only changed by `scaled`).
+*and* its direction and pen angle (pen size is only changed by `scaled`).
 
 ### 4.5 Conditional expression
 
@@ -139,6 +139,9 @@ directionpoint(p, d) -> point       # first point whose tangent is d;
                                     # error if none
 directionpoint(p, d, i) -> point    # the i-th such point, 0-based;
                                     # error if fewer than i + 1 exist
+pen(w) -> pen                       # round pen, w across (§6.1)
+pen(w, h) -> pen                    # ellipse, major axis along 0°
+pen(w, h, angle) -> pen             # errors when w <= 0 or h < 0
 draw(path, ...)                     # sketch mode: render path as a spine
 fill(path, ...)                     # sketch mode: fill a closed path
 ```
@@ -277,28 +280,26 @@ sixteen and 0.05 % at thirty-two.
 
 ## 6. Nodes and derived points
 
-A node is a skeleton point that knows the stroke's local direction and width:
+A node is a skeleton point that knows the stroke's local direction and the
+pen that draws through it:
 
 ```
-node n = (x, y) dir theta width w;
-node m = (x, y) dir theta width (wl, wr);          # asymmetric
-node k = (x, y) dir theta width w nib phi;         # explicit offset axis
+node n = (x, y) dir theta pen pen(w);
+node k = (x, y) dir theta pen italic;
 ```
 
 - `dir theta` — direction of travel of the (imaginary) stroke at this point,
   degrees.
-- `width w` — total stroke thickness. `width (wl, wr)` gives the left and
-  right offsets separately (`width w` ≡ `width (w/2, w/2)`). Asymmetric widths
-  express off-axis stress and expansion contrast.
-- `nib phi` — the axis along which width is applied. Default: `dir + 90`
-  (perpendicular). An explicit nib models broad-pen-like contrast without any
-  pen machinery.
+- `pen p` — any expression that evaluates to a pen (§6.1). Every node takes
+  exactly one.
 
-Derived points (exact, no approximation):
+Derived points (exact, no approximation): `n.left` and `n.right` are the
+pen's edge points across the direction of travel (§6.1), and `n.width` is
+the distance between them. For a round pen `pen(w)`:
 
 ```
-n.left  = n.pos + wl * unitvec(nib)
-n.right = n.pos - wr * unitvec(nib)
+n.left  = n.pos + (w/2) * unitvec(dir + 90)
+n.right = n.pos - (w/2) * unitvec(dir + 90)
 ```
 
 *Left* and *right* are relative to the direction of travel, like a river bank.
@@ -307,30 +308,28 @@ derived points and may freely adjust them (`n.left + (3, 0)`).
 
 ### 6.1 Pens
 
-A pen names a nib as a single design artifact — an ellipse:
+A pen is an ellipse:
 
 ```
-pen italic {
-  width  = 120;   # full major axis; required
-  height = 12;    # full minor axis; optional, default 0
-  angle  = 30;    # major-axis orientation, degrees; optional, default 0
-}
+italic = pen(120, 12, 30);   # width, height, angle
 
 node m = (x, y) dir theta pen italic;
 ```
 
-Field values are ordinary expressions (they may reference params), so a pen
-interpolates across the design space. The block binds `italic` to a
-first-class pen value: it can be passed to `def` macros. A node takes
-**either** `width` (optionally with `nib`) **or** `pen` — never both. A pen
-is a rule for deriving a node's edge points, not stroke expansion: contours
-are still written through the derived points, and the outline-first
-principles (§1) are unchanged.
+`pen(width, height, angle)` takes the full major axis, the full minor axis
+(default: `width`, a circle) and the major-axis orientation in degrees
+(default 0). Arguments are ordinary expressions (they may reference params),
+so a pen interpolates across the design space, and a pen built inside a
+`def` can vary from node to node. A pen is a first-class value: it can be
+bound to a name, passed to `def` macros, or written inline
+(`pen pen(hair)`). A pen is a rule for deriving a node's edge points, not
+stroke expansion: contours are still written through the derived points, and
+the outline-first principles (§1) are unchanged.
 
-A circle (`height = width`) is a monoline pen. `height = 0` (the default)
-is a razor: `pen x { width = w; angle = phi; }` on a node behaves exactly
-like `width w nib phi`. A small nonzero `height` is a *realistic* razor —
-where the travel direction becomes parallel to the nib, stroke thickness
+A circle (`height = width`, the default) is a monoline pen. `height = 0` is
+a razor: its edges sit at `±(width/2) * unitvec(angle)` whatever the travel
+direction. A small nonzero `height` is a *realistic* razor — where the
+travel direction becomes parallel to the pen's axis, stroke thickness
 bottoms out at `height` instead of collapsing to zero.
 
 **Edge points.** For semi-axes `a = width/2`, `b = height/2` and a node
@@ -345,7 +344,8 @@ n.right = n.pos − x*
 ```
 
 With `height > 0`, `left` is always the geometric left bank of travel. With
-`height = 0` the legacy fixed-axis rule applies (offsets `a` along `angle`).
+`height = 0` the support point is degenerate, and the fixed-axis rule applies
+(offsets `a` along `angle`).
 
 **Thin crossings.** Where the travel direction crosses the pen's major
 axis, the edge points swing to the other end of the pen within a few
@@ -365,15 +365,16 @@ contour ... n.right .. {w.dir} w.right .. o.right ...
 ```
 
 This mirrors placing points at extrema in ordinary outline design: a
-feature narrower than the sampling must be witnessed by a point. (The
-legacy `width`/`nib` razor never needs this because its banks are the
-skeleton translated by a constant vector, which sparse samples reproduce
-exactly — a special property of the degenerate pen.)
+feature narrower than the sampling must be witnessed by a point. (A razor
+never needs this because its banks are the skeleton translated by a constant
+vector, which sparse samples reproduce exactly; nor does a circle, whose
+banks stay perpendicular to travel. Those are special properties of the two
+degenerate pens.)
 
-**Terminals.** Pen nodes expose two more derived points: `n.tip`, the
+**Terminals.** Nodes expose two more derived points: `n.tip`, the
 support point along `+dir` (the front of the pen), and `n.tail` (along
-`−dir`). Both are errors on razor (`height = 0`) and width/nib nodes, where
-the front point is undefined. The ellipse's tangent at the support point for
+`−dir`). Both are errors on razor (`height = 0`) nodes, where the front
+point is undefined. The ellipse's tangent at the support point for
 direction `v` is perpendicular to `v`, so a terminal that traces the pen is
 three points with known direction constraints:
 
@@ -403,7 +404,7 @@ example in §11.
 ## 7. Program structure
 
 A source file contains, in any order: a `params` block, a `metrics` block,
-`pen` blocks, top-level bindings, `def` macros, `glyph` blocks, and (in
+top-level bindings, `def` macros, `glyph` blocks, and (in
 sketch files) top-level `draw`/`fill` calls.
 
 ### 7.1 params
@@ -435,16 +436,7 @@ expressions (they may reference params). Keys `upm`, `x`, `cap`, `asc`,
 `desc` have meaning to the renderer (viewbox, preview guidelines); any other
 key is simply a named number.
 
-### 7.3 pen
-
-```
-pen italic { width = 120; height = 12; angle = 30; }
-```
-
-A named pen (§6.1). Top-level only, like `params` and `metrics`; the name
-is an ordinary immutable binding.
-
-### 7.4 Top-level bindings
+### 7.3 Top-level bindings
 
 ```
 stem = 40 + 0.14 * weight;
@@ -470,14 +462,14 @@ glyph o {
 `ductus inspect file.ductus [--set …] [--glyph name]` prints them; so does the
 playground's inspector.
 
-### 7.5 def — macros
+### 7.4 def — macros
 
 ```
 def bowl(c, rx, ry) -> (n, w, s, e) {
-  node n = c + (0,  ry) dir left  width hair;
-  node w = c + (-rx, 0) dir down  width stem;
-  node s = c + (0, -ry) dir right width hair;
-  node e = c + (rx, 0)  dir up    width stem;
+  node n = c + (0,  ry) dir left  pen pen(hair);
+  node w = c + (-rx, 0) dir down  pen pen(stem);
+  node s = c + (0, -ry) dir right pen pen(hair);
+  node e = c + (rx, 0)  dir up    pen pen(stem);
 }
 
 def diamond(c, r) -> p {
@@ -493,7 +485,7 @@ def diamond(c, r) -> p {
   `(n, w, s, e) = bowl(center, rx, ry);`.
 - Macros may call macros. No recursion in v0.1.
 
-### 7.6 glyph
+### 7.5 glyph
 
 ```
 glyph o : U+006F {
@@ -522,7 +514,7 @@ glyph o : U+006F {
 - Glyph bodies are ordinary scopes: local bindings, nodes, and macro calls are
   allowed and see all top-level bindings.
 
-### 7.7 Sketch files
+### 7.6 Sketch files
 
 A file with no `glyph` block is a sketch: top-level `draw(path)` renders paths
 as thin spines, `fill(path)` fills closed ones. This keeps the playground
@@ -549,7 +541,7 @@ in spirit.
   conditionals.
 - **import** — `import "file.ductus";` (top level only) evaluates the file's
   items into the current scope at the import's position: params, metrics,
-  pens, defs, bindings and glyphs land as if written inline. Include-once
+  defs, bindings and glyphs land as if written inline. Include-once
   per canonical file; cycles are errors; nested imports resolve relative
   to the importing file; errors are prefixed with the imported file's
   name. File access comes from the host (the CLI), so the playground
@@ -658,10 +650,10 @@ hair = contrast * stem;
 
 def bowl(c, rx, ry) -> (n, w, s, e) {
   # counterclockwise travel: top -> left -> bottom -> right
-  node n = c + (0,  ry) dir left  width hair;
-  node w = c + (-rx, 0) dir down  width stem;
-  node s = c + (0, -ry) dir right width hair;
-  node e = c + (rx, 0)  dir up    width stem;
+  node n = c + (0,  ry) dir left  pen pen(hair);
+  node w = c + (-rx, 0) dir down  pen pen(stem);
+  node s = c + (0, -ry) dir right pen pen(hair);
+  node e = c + (rx, 0)  dir up    pen pen(stem);
 }
 
 glyph o : U+006F {
@@ -730,13 +722,11 @@ glyph stem_slab {
 - Point literal `( e , e )` vs parenthesized expression `( e )` are
   distinguished by the comma. Destructuring `( id , id , ... ) =` is a
   statement-level pattern, not an expression.
-- Keyword arguments to `node` (`dir`, `width`, `nib`, `pen`) are ordered
-  clauses; `dir` is required. The grammar leaves `width`/`nib`/`pen` all
-  optional; the exactly-one-of-`width`-or-`pen` rule (and `nib` only with
-  `width`) is enforced during lowering so partially-typed code still parses.
-- `pen` blocks reuse the `assignment` rule for their fields; the field names
-  (`width`, `height`, `angle`) are validated during lowering, not by the
-  grammar.
+- Keyword arguments to `node` (`dir`, `pen`) are ordered clauses; both are
+  required. The grammar leaves `pen` optional so partially-typed code still
+  parses; lowering enforces it. `pen` is a keyword only in clause position:
+  in an expression it is the identifier of the `pen()` built-in, so
+  `pen pen(w)` parses as clause plus call.
 - `U+XXXX` is a token appearing only in glyph headers.
 - The grammar implements Phase 2 syntax (`for`, lists, `import`) from day
   one; the evaluator gates them.

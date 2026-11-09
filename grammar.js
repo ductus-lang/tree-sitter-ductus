@@ -35,7 +35,6 @@ export default grammar({
       choice(
         $.params_block,
         $.metrics_block,
-        $.pen_block,
         $.def_declaration,
         $.glyph_block,
         $.import_statement,
@@ -65,9 +64,9 @@ export default grammar({
     tuple_pattern: ($) =>
       seq("(", $.identifier, repeat1(seq(",", $.identifier)), ")"),
 
-    // Exactly one of `width` (optionally with `nib`) or `pen` is required;
-    // the grammar accepts any combination so that partially-typed code still
-    // parses, and lowering enforces the rule with a precise diagnostic.
+    // The `pen` clause is required; the grammar leaves it optional so that
+    // partially-typed code still parses, and lowering enforces the rule with
+    // a precise diagnostic.
     node_declaration: ($) =>
       seq(
         "node",
@@ -75,17 +74,11 @@ export default grammar({
         "=",
         field("position", $._expression),
         field("dir", $.dir_clause),
-        optional(field("width", $.width_clause)),
-        optional(field("nib", $.nib_clause)),
         optional(field("pen", $.pen_clause)),
         ";",
       ),
 
     dir_clause: ($) => seq("dir", $._expression),
-
-    width_clause: ($) => seq("width", $._expression),
-
-    nib_clause: ($) => seq("nib", $._expression),
 
     pen_clause: ($) => seq("pen", $._expression),
 
@@ -122,18 +115,6 @@ export default grammar({
       seq(field("min", $._expression), "..", field("max", $._expression)),
 
     metrics_block: ($) => seq("metrics", "{", repeat($.assignment), "}"),
-
-    // A named pen: an ellipse given by width (major axis), height (minor
-    // axis) and angle (major-axis orientation). Fields are ordinary
-    // assignments; lowering validates the keys.
-    pen_block: ($) =>
-      seq(
-        "pen",
-        field("name", $.identifier),
-        "{",
-        repeat($.assignment),
-        "}",
-      ),
 
     def_declaration: ($) =>
       seq(

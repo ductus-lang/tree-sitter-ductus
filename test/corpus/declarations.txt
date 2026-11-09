@@ -2,90 +2,7 @@
 Node declaration
 ================================================================================
 
-node n = (x, y) dir theta width w;
-
---------------------------------------------------------------------------------
-
-(source_file
-  (node_declaration
-    name: (identifier)
-    position: (point
-      x: (identifier)
-      y: (identifier))
-    dir: (dir_clause
-      (identifier))
-    width: (width_clause
-      (identifier))))
-
-================================================================================
-Node with expression position and direction constant
-================================================================================
-
-node w = c + (-rx, 0) dir down width stem;
-
---------------------------------------------------------------------------------
-
-(source_file
-  (node_declaration
-    name: (identifier)
-    position: (binary_expression
-      left: (identifier)
-      right: (point
-        x: (unary_expression
-          operand: (identifier))
-        y: (number)))
-    dir: (dir_clause
-      (identifier))
-    width: (width_clause
-      (identifier))))
-
-================================================================================
-Node with asymmetric width
-================================================================================
-
-node m = (x, y) dir theta width (wl, wr);
-
---------------------------------------------------------------------------------
-
-(source_file
-  (node_declaration
-    name: (identifier)
-    position: (point
-      x: (identifier)
-      y: (identifier))
-    dir: (dir_clause
-      (identifier))
-    width: (width_clause
-      (point
-        x: (identifier)
-        y: (identifier)))))
-
-================================================================================
-Node with nib angle
-================================================================================
-
-node k = (x, y) dir theta width w nib phi;
-
---------------------------------------------------------------------------------
-
-(source_file
-  (node_declaration
-    name: (identifier)
-    position: (point
-      x: (identifier)
-      y: (identifier))
-    dir: (dir_clause
-      (identifier))
-    width: (width_clause
-      (identifier))
-    nib: (nib_clause
-      (identifier))))
-
-================================================================================
-Node with a pen
-================================================================================
-
-node m = (x, y) dir theta pen italic;
+node n = (x, y) dir theta pen p;
 
 --------------------------------------------------------------------------------
 
@@ -101,29 +18,47 @@ node m = (x, y) dir theta pen italic;
       (identifier))))
 
 ================================================================================
-Pen block
+Node with an inline pen
 ================================================================================
 
-pen italic {
-  width = 120;
-  height = 12;
-  angle = 30;
-}
+node w = c + (-rx, 0) dir down pen pen(stem);
 
 --------------------------------------------------------------------------------
 
 (source_file
-  (pen_block
+  (node_declaration
     name: (identifier)
-    (assignment
-      name: (identifier)
-      value: (number))
-    (assignment
-      name: (identifier)
-      value: (number))
-    (assignment
-      name: (identifier)
-      value: (number))))
+    position: (binary_expression
+      left: (identifier)
+      right: (point
+        x: (unary_expression
+          operand: (identifier))
+        y: (number)))
+    dir: (dir_clause
+      (identifier))
+    pen: (pen_clause
+      (call_expression
+        function: (identifier)
+        arguments: (arguments
+          (identifier))))))
+
+================================================================================
+Pen constructor
+================================================================================
+
+italic = pen(120, 12, 30);
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment
+    name: (identifier)
+    value: (call_expression
+      function: (identifier)
+      arguments: (arguments
+        (number)
+        (number)
+        (number)))))
 
 ================================================================================
 Destructuring assignment
